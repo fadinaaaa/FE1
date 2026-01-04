@@ -1,0 +1,773 @@
+/*
+ * AhsList.css
+ * Menggabungkan gaya untuk AhsList (tabel utama) dan AhsDetail (tabel detail)
+ */
+
+/* =========================================== */
+/* ## 1. KONTAINER UTAMA & RESPONSIVE LIST */
+/* =========================================== */
+.ahs-list-container {
+    width: 100%;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    /* Max height untuk scroll vertikal pada body tabel */
+    max-height: 68vh; 
+}
+
+/* =========================================== */
+/* ## 2. GAYA TABEL UTAMA (AHS-LIST) */
+/* =========================================== */
+
+/* Gaya dasar tabel utama */
+.ahs-table {
+    width: 100%;
+    border-collapse: separate; 
+    border-spacing: 0;
+    min-width: 1000px; /* Memastikan tabel tidak terlalu kecil saat di-scroll horizontal */
+    margin-bottom: 30px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Header Sticky Ungu */
+.ahs-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #2d1666; /* Biru Tua / Ungu Gelap */
+    color: white;
+    z-index: 10;
+    padding: 14px 12px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Kolom aksi di header (Sticky Kanan) */
+.ahs-table thead th.sticky-action {
+    position: sticky;
+    right: 0; 
+    z-index: 11;
+    border-left: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Baris Data */
+.ahs-table tbody tr.ahs-row td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+    color: #333;
+    vertical-align: middle;
+    background-color: white;
+    white-space: nowrap;
+}
+
+.ahs-table tbody tr.ahs-row:hover td {
+    background-color: #f9f9ff;
+}
+
+/* Baris Aktif (saat detail dibuka) */
+.ahs-table tbody tr.ahs-row.active td {
+    background-color: #e6e9ff; /* Warna highlight biru muda */
+}
+
+/* Pengaturan Kolom Spesifik di Tabel Utama */
+.col-deskripsi {
+    white-space: normal !important;
+    min-width: 200px;
+    max-width: 350px;
+}
+.col-hpp {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* Kolom Aksi Data (Sticky Kanan) */
+.ahs-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    position: sticky;
+    right: 0;
+    background-color: white; /* Wajib agar tidak tembus pandang */
+    /* Menghilangkan border bawah di kolom aksi agar terlihat rapi */
+    border-bottom: 1px solid #eee; 
+}
+
+/* Background sticky kolom aksi saat hover/aktif */
+.ahs-table tbody tr.ahs-row:hover td.ahs-actions { background-color: #f9f9ff; }
+.ahs-table tbody tr.ahs-row.active td.ahs-actions { background-color: #e6e9ff; }
+
+
+/* Tombol Aksi */
+.btn-icon {
+    width: 32px; height: 32px;
+    border: none; border-radius: 4px;
+    cursor: pointer; 
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.2s;
+}
+.btn-icon:hover { opacity: 0.8; }
+
+.btn-view { background-color: #f1c40f; } /* Kuning */
+.btn-edit { background-color: #0000ff; } /* Biru */
+.btn-delete { background-color: #ff0000; } /* Merah */
+
+
+/* =========================================== */
+/* ## 3. GAYA BARIS DETAIL & NO DATA */
+/* =========================================== */
+
+/* Baris Detail */
+.ahs-detail-row td {
+    padding: 0;
+    background: #fdfdfd;
+    border-left: 4px solid #0000ff; /* Garis biru di kiri */
+    border-bottom: none !important; /* Hilangkan border bawah baris detail */
+}
+
+.no-data-cell {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-style: italic;
+}
+
+
+/* =========================================== */
+/* ## 4. GAYA KOMPONEN AHS DETAIL (Detail Item) */
+/* =========================================== */
+.ahs-detail {
+    padding: 15px;
+}
+
+/* Judul detail */
+.ahs-detail .detail-title {
+    background-color: #cde7ff;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #004b8d;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+/* Konteks untuk tabel detail agar tidak memengaruhi tabel luar */
+.ahs-detail .table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Tabel di dalam AhsDetail */
+.ahs-detail .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    min-width: 700px; /* Minimal width untuk tabel detail */
+}
+
+.ahs-detail .detail-table th, .ahs-detail .detail-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.ahs-detail .detail-table th {
+    background-color: #2d1666;
+}
+
+.ahs-detail .detail-table tfoot td.total-label {
+    text-align: right;
+    font-weight: bold;
+    background-color: #f9f9f9;
+}
+.ahs-detail .detail-table tfoot td.total-value {
+    font-weight: bold;
+    background-color: #f9f9f9;
+}
+
+/* Pengaturan Total Harga Pokok */
+.ahs-total {
+    margin-top: 10px;
+    font-weight: bold;
+    color: red;
+    text-align: right;
+    padding: 0 15px 15px 0; /* Padding agar total tidak menempel */
+}
+/* ============================= */
+/* DETAIL INFO (ATAS TABEL ITEM) */
+/* ============================= */
+
+.ahs-info-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.ahs-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.ahs-info-label {
+  background-color: #2d1666; /* 🔵 SAMA PERSIS header tabel */
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 4px 4px 0 0;
+}
+
+.ahs-info-value {
+  border: 1px solid #2d1666;
+  border-top: none;
+  padding: 10px;
+  font-size: 13px;
+  color: #333;
+  min-height: 38px;
+  border-radius: 0 0 4px 4px;
+  background: #fafafa;
+}
+/* === DETAIL PRODUK AHS (BIRU SEPERTI HEADER TABEL) === */
+.ahs-produk-detail {
+  background: #2d1666; /* sama dengan header tabel */
+  color: #e6e9ff;
+  border-radius: 8px;
+  border: none;
+}
+
+.ahs-produk-detail .label {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 4px;
+}
+
+.ahs-produk-detail .value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e6e9ff;
+}
+
+/* Jika tidak ada foto */
+.ahs-produk-detail span {
+  color: black;
+}
+
+/* Foto agar tetap rapi */
+.ahs-produk-detail img {
+  background: #ffffff;
+}
+/* ================= HEADER DETAIL ================= */
+.detail-title {
+  margin-top: 0;
+  color: #2d1666;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.detail-info {
+  color: #666;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
+
+/* ================= DETAIL PRODUK ATAS (TABLE LOOK) ================= */
+.ahs-produk-detail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0;                     /* menyatu seperti tabel */
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  background: #ffffff;
+}
+
+/* KOLOM */
+.detail-item {
+  border-left: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-item:first-child {
+  border-left: none;
+}
+
+/* HEADER KOLOM (BIRU) */
+.detail-item .label {
+  background-color: #2d1666;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-bottom: 1px solid #ffffff;
+  white-space: nowrap;
+}
+
+/* ISI KOLOM (PUTIH) */
+.detail-item .value {
+  background-color: #ffffff;
+  color: black;
+  font-size: 13px;
+  padding: 10px;
+  min-height: 42px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* FOTO */
+.detail-item img {
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
+
+/* JIKA TIDAK ADA FOTO */
+.no-photo {
+  font-size: 12px;
+  color: #999;
+}
+
+/* ================= TABEL RINCIAN ================= */
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.detail-table th {
+  background: #2d1666;
+  color: #ffffff;
+  padding: 8px;
+  text-align: left;
+}
+
+.detail-table td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.detail-table tfoot td {
+  background: #eef2f5;
+  font-weight: bold;
+}
+
+/* ALIGNMENT */
+.center {
+  text-align: center;
+}
+
+.right {
+  text-align: right;
+}
+
+.no-data {
+  text-align: center;
+  padding: 15px;
+  color: #999;
+}
+
+/* ================= FOTO MODAL ================= */
+.foto-wrapper {
+  cursor: pointer;
+  text-align: center;
+}
+
+.foto-preview {
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  padding: 10px;
+  background: #ffffff;
+  transition: transform 0.2s ease;
+}
+
+.foto-wrapper:hover .foto-preview {
+  transform: scale(1.03);
+}
+
+.foto-caption {
+  font-size: 12px;
+  color: #2e1a5e;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+/* OVERLAY */
+.foto-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* MODAL BOX */
+.foto-modal-content {
+  position: relative;
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+/* GAMBAR */
+.foto-modal-image {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+/* TOMBOL CLOSE */
+.foto-modal-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+/* FOTO PREVIEW */
+.foto-wrapper {
+    display: inline-block;
+    cursor: pointer;
+    text-align: center;
+}
+
+.foto-preview {
+    max-width: 160px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: transform 0.2s ease;
+}
+
+.foto-preview:hover {
+    transform: scale(1.05);
+}
+
+.foto-caption {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #2e1a5e;
+    font-weight: 600;
+}
+
+/* MODAL */
+.foto-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.foto-modal-content {
+    position: relative;
+    background: #fff;
+    padding: 16px;
+    border-radius: 10px;
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.foto-modal-image {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 8px;
+}
+
+.foto-modal-close {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #2e1a5e;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+}
+/* ===============================
+   FOTO PREVIEW
+================================ */
+.foto-preview {
+  max-width: 200px;
+  max-height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+}
+
+/* ===============================
+   MODAL OVERLAY
+================================ */
+.foto-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* ===============================
+   MODAL CONTENT (BESAR)
+================================ */
+.foto-modal-content {
+  position: relative;
+  width: 85vw;        /* 👉 BESAR */
+  max-width: 1000px;  /* 👉 BATAS MAKS */
+  max-height: 85vh;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===============================
+   GAMBAR DALAM MODAL
+================================ */
+.foto-modal-image {
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* ===============================
+   TOMBOL CLOSE
+================================ */
+.foto-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.foto-modal-close:hover {
+  background: #c62828;
+}
+
+/* ===============================
+   CAPTION
+================================ */
+.foto-caption {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #555;
+  text-align: center;
+}
+/* ===============================
+   MODAL CONTENT
+================================ */
+.foto-modal-content {
+  width: 85vw;
+  max-width: 1000px;
+  max-height: 90vh;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===============================
+   GAMBAR MODAL
+================================ */
+.foto-modal-image {
+  width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* ===============================
+   BUTTON TUTUP
+================================ */
+.foto-modal-btn {
+  margin-top: 16px;
+  padding: 10px 28px;
+  background: #2e1a5e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.foto-modal-btn:hover {
+  background: #1d103f;
+}
+/* ===============================
+   MODAL CONTENT (DIPERKECIL)
+================================ */
+.foto-modal-content {
+  width: 70vw;
+  max-width: 850px;
+  max-height: 85vh;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===============================
+   CONTAINER FOTO (GESER)
+================================ */
+.foto-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  width: 100%;
+  scroll-snap-type: x mandatory;
+}
+
+/* scrollbar halus */
+.foto-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.foto-scroll::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+/* ===============================
+   FOTO DALAM MODAL
+================================ */
+.foto-modal-image {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 750px;
+  max-height: 65vh;
+  object-fit: contain;
+  border-radius: 8px;
+  scroll-snap-align: center;
+}
+
+/* ===============================
+   BUTTON TUTUP
+================================ */
+.foto-modal-btn {
+  margin-top: 14px;
+  padding: 10px 26px;
+  background: #2e1a5e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.foto-modal-btn:hover {
+  background: #1d103f;
+}
+/* ===============================
+   FOTO MODAL – FINAL (LEBIH KECIL)
+================================ */
+.foto-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* 📉 DIPERKECIL */
+.foto-modal-content {
+  width: 60vw;          /* sebelumnya 70–85vw */
+  max-width: 700px;     /* lebih kecil */
+  max-height: 75vh;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===============================
+   FOTO SCROLL
+================================ */
+.foto-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  width: 100%;
+  padding-bottom: 8px;
+}
+
+/* ===============================
+   FOTO DALAM MODAL
+================================ */
+.foto-modal-image {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 600px;     /* diperkecil */
+  max-height: 55vh;     /* diperkecil */
+  object-fit: contain;
+  border-radius: 8px;
+  background: #f5f5f5;
+}
+
+/* ===============================
+   TOMBOL TUTUP
+================================ */
+.foto-modal-btn {
+  margin-top: 12px;
+  padding: 8px 22px;
+  background: #2e1a5e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.foto-modal-btn:hover {
+  background: #1d103f;
+}
+

@@ -1,0 +1,63 @@
+/* Styling untuk ikon profil */
+.profile-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px; /* Ukuran ikon */
+    padding: 0;
+    margin: 0;
+}
+
+/* Container untuk posisi relatif */
+.profile-container {
+    position: relative;
+    /* Ini memastikan dropdown diletakkan relatif terhadap ikon */
+}
+
+/* Styling untuk dropdown menu */
+.profile-dropdown {
+    position: absolute;
+    top: 100%; /* Turunkan sedikit dari Header Bar */
+    right: 0;
+    width: 200px; /* Lebar dropdown */
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    margin-top: 10px; /* Jarak dari ikon */
+    z-index: 100; /* Pastikan di atas elemen lain */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.admin-name {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+}
+
+.profile-dropdown hr {
+    width: 100%;
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 5px 0 10px 0;
+}
+
+.logout-button {
+    background-color: #dc3545; /* Merah untuk logout */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+    background-color: #c82333;
+}

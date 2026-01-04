@@ -1,0 +1,348 @@
+/* ========================================================= */
+/* Vendor.css: Gaya untuk Layout Utama, Topbar, dan Tabel Vendor */
+/* ========================================================= */
+
+/* === 1. LAYOUT UTAMA (Font Segoe UI) === */
+.vendor-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f7fb;
+  /* Abu muda lembut */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.vendor-main {
+  flex: 1;
+  /* Mengambil sisa lebar setelah sidebar */
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  /* Warna background halaman */
+
+  /* KUNCI: Set padding jadi 0 agar Header nempel ke tepi */
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 100vh;
+  /* Full tinggi layar */
+  overflow-y: auto;
+  /* Agar bisa discroll jika konten panjang */
+}
+
+/* === 2. TOPBAR SEJAJAR (INPUT KIRI - TOMBOL KANAN) === */
+.topbar-container {
+  /* Karena .vendor-main paddingnya 0, kita beri jarak (margin) di sini */
+  margin: 20px 25px 10px 25px;
+  /* Atas Kanan Bawah Kiri */
+
+  background-color: white;
+  /* Opsional: jika ingin putih */
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Grup Input (Kiri) */
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+/* Grup Tombol (Kanan) */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Styling Input agar seragam */
+.topbar-container input {
+  padding: 0 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+  height: 40px;
+  /* Tinggi Paten */
+  box-sizing: border-box;
+  transition: 0.2s;
+  font-family: inherit;
+}
+
+.topbar-container input:focus {
+  border-color: #007bff;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper .icon-search {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #888;
+  pointer-events: none;
+}
+
+.input-wrapper input {
+  padding-left: 30px;
+  width: 200px;
+}
+
+.input-tahun {
+  width: 100px;
+}
+
+/* Styling Tombol Topbar */
+.btn-action {
+  height: 40px;
+  /* Tinggi Paten sama dengan input */
+  padding: 0 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.btn-action:hover {
+  opacity: 0.9;
+}
+
+.btn-export {
+  background-color: #007bff;
+}
+
+/* Biru */
+.btn-import {
+  background-color: #28a745;
+}
+
+/* Hijau */
+.btn-new {
+  background-color: #007bff;
+}
+
+/* Biru */
+
+/* === TAMBAHAN DROPDOWN IMPORT (Untuk mengatasi masalah sebelumnya) === */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  padding: 6px 0;
+  z-index: 100;
+  min-width: 160px;
+  display: flex;
+  /* Kunci: Memastikan orientasi vertikal */
+  flex-direction: column;
+  /* Kunci: Memastikan orientasi vertikal */
+}
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 10px 16px;
+  width: 100%;
+  cursor: pointer;
+  font-size: 14px;
+  color: #444;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f5f7fb;
+  color: #007bff;
+}
+
+
+/* === 3. TABEL VENDOR STICKY & RAPI === */
+.vendor-content {
+  margin: 0 25px 25px 25px;
+  /* Kanan Bawah Kiri */
+  /* Margin atas 0 karena sudah ada jarak dari margin-bottom topbar */
+}
+
+/* Wrapper untuk scroll & sticky header */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 68vh;
+  padding-bottom: 10px;
+}
+
+.vendor-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1200px;
+}
+
+/* Header Sticky Ungu */
+.vendor-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #2d1666;
+  /* Biru Tua / Ungu Gelap */
+  color: white;
+  z-index: 10;
+  padding: 14px 12px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Body Items */
+.vendor-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+  color: #333;
+  vertical-align: middle;
+  background-color: white;
+  white-space: nowrap;
+}
+
+.vendor-table tr:hover td {
+  background-color: #f9f9ff;
+}
+
+.col-name {
+  font-weight: bold;
+  color: #0d254c;
+}
+
+/* === 4. TOMBOL AKSI DI TABEL === */
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.action-buttons button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-view {
+  background-color: #f1c40f;
+}
+
+/* Kuning */
+.btn-edit {
+  background-color: #0000ff;
+}
+
+/* Biru */
+.btn-delete {
+  background-color: #ff0000;
+}
+
+/* Merah */
+
+
+/* === 5. MODAL STYLING === */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #ffffff !important;
+  color: #333 !important;
+  padding: 25px 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  width: 450px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  font-family: inherit;
+}
+
+.modal h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+  color: #0d254c;
+  text-align: center;
+}
+
+.close-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 1.2rem;
+  color: #888;
+  cursor: pointer;
+}
+
+.close-icon:hover {
+  color: #333;
+}
+
+.close-btn {
+  background-color: #aaa;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 20px;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+}
+
+.detail-content p {
+  margin: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px dashed #eee;
+  padding-bottom: 5px;
+}
+

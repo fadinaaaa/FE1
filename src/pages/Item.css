@@ -1,0 +1,374 @@
+/* === 1. LAYOUT UTAMA === */
+.vendor-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f7fb; /* Abu muda lembut */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.vendor-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 25px;
+  overflow: hidden; /* Mencegah scroll ganda */
+}
+
+/* === 2. TOPBAR SEJAJAR (INPUT KIRI, TOMBOL KANAN) === */
+.topbar-container {
+  background-color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Memisahkan Kiri dan Kanan mentok */
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+/* Grup Input (Kiri) */
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+/* Grup Tombol (Kanan) */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Styling Input */
+.topbar-container input {
+  padding: 0 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+  height: 40px; /* Tinggi Paten */
+  box-sizing: border-box;
+  transition: 0.2s;
+}
+
+.topbar-container input:focus { border-color: #007bff; }
+
+.input-wrapper { position: relative; }
+.input-wrapper .icon-search {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 12px; color: #888; pointer-events: none;
+}
+.input-wrapper input { padding-left: 30px; width: 180px; }
+.input-tahun { width: 100px; }
+
+/* Styling Tombol Topbar */
+.btn-action {
+  height: 40px; /* Tinggi Paten (Sama dengan Input) */
+  padding: 0 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+.btn-action:hover { opacity: 0.9; }
+
+.btn-export { background-color: #007bff; } /* Biru */
+.btn-import { background-color: #28a745; } /* Hijau */
+.btn-new    { background-color: #007bff; } /* Biru */
+
+/* === 3. TABEL STICKY & HEADER UNGU === */
+.vendor-content {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 0; /* Padding dihandle table wrapper */
+  overflow: hidden;
+}
+
+/* Wrapper Tabel (Penting untuk Scroll & Sticky) */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 68vh; /* Batas tinggi agar header sticky bekerja */
+  padding-bottom: 10px;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: separate; /* Diperlukan untuk sticky border */
+  border-spacing: 0;
+  min-width: 1600px; /* Lebar minimal agar tidak gepeng */
+}
+
+/* Header Sticky */
+.custom-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #2d1666; /* Warna Ungu */
+  color: white;
+  z-index: 10;
+  padding: 14px 12px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Body Items */
+.custom-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+  color: #333;
+  vertical-align: middle;
+  background-color: white; /* Agar tidak tembus pandang saat scroll */
+}
+
+.custom-table tr:hover td { background-color: #f9f9ff; }
+
+/* Pengaturan Kolom */
+.custom-table td { white-space: nowrap; } /* Default satu baris */
+
+/* Kolom yang boleh turun baris */
+.col-deskripsi, .col-desc-prod, .col-specs {
+  white-space: normal !important;
+  min-width: 200px;
+  max-width: 350px;
+  line-height: 1.5;
+}
+
+.link-doc { color: #2d1666; font-weight: bold; text-decoration: none; display: block; margin-bottom: 4px;}
+.link-doc:hover { text-decoration: underline; }
+
+.spec-text { font-size: 12px; color: #666; white-space: pre-line; }
+
+.table-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
+
+/* === 4. TOMBOL AKSI DI TABEL (KUNING, BIRU, MERAH) === */
+.action-buttons { display: flex; gap: 6px; justify-content: center; }
+.action-buttons button {
+  width: 32px; height: 32px;
+  border: none; border-radius: 4px;
+  cursor: pointer; color: white;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-view { background-color: #f1c40f; } /* Kuning */
+.btn-edit { background-color: #0000ff; } /* Biru */
+.btn-delete { background-color: #ff0000; } /* Merah */
+
+/* === 5. MODAL === */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex; justify-content: center; align-items: center; z-index: 1000;
+}
+.modal {
+  background: white; width: 400px; padding: 25px;
+  border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.modal h3 { margin-top: 0; color: #2d1666; text-align: center; margin-bottom: 20px; }
+.modal-body input {
+  width: 100%; padding: 10px; margin-bottom: 12px;
+  border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+}
+.modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
+.btn-save { flex: 1; padding: 10px; background: #2d1666; color: white; border: none; border-radius: 6px; cursor: pointer; }
+.btn-cancel { flex: 1; padding: 10px; background: #ccc; color: #333; border: none; border-radius: 6px; cursor: pointer; }
+
+/* --- CSS BARU UNTUK FITUR VENDOR AUTOSUGGESTION --- */
+
+/* Gaya untuk kontainer dropdown saran vendor */
+.autocomplete-dropdown {
+    /* Atur posisi relatif terhadap input vendor */
+    position: absolute;
+    top: 100%; /* Tepat di bawah input */
+    left: 0;
+    z-index: 1000; /* Pastikan muncul di atas elemen lain */
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-top: none;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 4px 4px;
+}
+
+/* Gaya untuk setiap item saran */
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+/* Hover state untuk item saran */
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+/* Gaya untuk informasi lokasi vendor (opsional, untuk memperjelas) */
+.suggestion-item span {
+    color: #888;
+    font-style: italic;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+/* Pastikan elemen parent input vendor (div) memiliki posisi relatif 
+   agar dropdown berada di posisi yang benar.
+   Anda sudah menambahkan style inline: style={{ position: 'relative' }} 
+   di div parent input vendor, jadi ini hanya sebagai catatan.
+*/
+
+/* Item.css */
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f8ff;
+}
+
+.suggestion-item span {
+    font-size: 0.85em;
+    color: #666;
+    margin-left: 5px;
+}
+
+.filter-wrapper {
+  position: relative;
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.filter-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filter-item:hover {
+  background-color: #f0f4ff;
+}
+
+/* =========================
+   OVERLAY
+   ========================= */
+.gambar-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =========================
+   KONTEN MODAL (LEBIH KECIL)
+   ========================= */
+.gambar-modal-content {
+    background: #fff;
+    width: 65%;
+    max-width: 700px;
+    max-height: 70vh;
+
+    border-radius: 14px;
+    padding: 16px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* =========================
+   SCROLL GAMBAR
+   ========================= */
+.gambar-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    max-width: 100%;
+    padding-bottom: 8px;
+}
+
+/* =========================
+   GAMBAR
+   ========================= */
+.gambar-modal-image {
+    height: 220px;
+    object-fit: contain;
+    background: #f4f4f4;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+/* =========================
+   TOMBOL TUTUP
+   ========================= */
+.gambar-modal-btn {
+    margin-top: 14px;
+    width: 100%;
+    background: #b00000;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.gambar-modal-image {
+    height: 180px;
+}

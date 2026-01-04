@@ -1,0 +1,93 @@
+.add-ahs-container {
+  display: flex;
+  background-color: #f9f9fb;
+  min-height: 100vh;
+}
+
+.add-ahs-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.ahs-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ahs-form input {
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.item-dropdown {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.btn-add-item, .btn-save {
+  background-color: #2f1761;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.item-list {
+  margin-top: 1rem;
+}
+
+.item-card {
+  display: flex;
+  justify-content: space-between;
+  background-color: #eee;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 5px;
+}
+/* ... Tambahkan di file AddAHS.css ... */
+
+.item-list-header {
+  background-color: #f4f4f4; /* Latar belakang abu-abu */
+  color: #333;
+  margin-top: 15px; /* Jarak dari dropdown di atasnya */
+  border-bottom: 2px solid #ccc; /* Garis bawah tebal */
+  border-radius: 4px 4px 0 0; /* Sudut atas membulat */
+}
+
+/* Pastikan semua baris data punya border atas, kecuali yg nempel header */
+.item-list .item-card:not(.item-list-header) {
+  border-top: 1px solid #eee;
+}
+
+.item-list-header + .item-card {
+  border-top: none; /* Baris data pertama TEPAT di bawah header */
+}
+/* src/assets/styles/AddAHS.css */
+
+/* ... (CSS Anda yang lain) ... */
+
+/* Ganti .item-section agar jadi sebaris (horizontal) */
+.item-section {
+  display: flex;
+  align-items: center; /* Membuatnya sejajar secara vertikal */
+  gap: 10px; /* Memberi jarak antar elemen */
+  margin-bottom: 20px;
+}
+
+/* Beri style pada input volume agar ukurannya pas */
+.input-volume {
+  width: 100px; /* Atur lebar secukupnya */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Pastikan dropdown-nya tidak terlalu lebar */
+.item-dropdown-container {
+  flex-grow: 1; /* Biarkan dropdown mengambil sisa ruang */
+}

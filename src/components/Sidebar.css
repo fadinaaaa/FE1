@@ -1,0 +1,249 @@
+/* Layout utama */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: white; /* warna putih untuk area konten */
+}
+
+/* Sidebar di kiri */
+.sidebar {
+  width: 230px;
+  background-color: #2E1878; /* ungu sidebar */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* agar isi sidebar sejajar di tengah */
+  padding: 20px 10px;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 0; /* jarak atas dan bawah logo */
+  margin-bottom: 40px; /* jarak dari menu di bawah */
+}
+
+.logo img {
+  width: 120px; /* ukuran proporsional terhadap sidebar */
+  height: auto;
+  display: block;
+  object-fit: contain; /* menjaga proporsi logo */
+  border-radius: 8px; /* opsional: sudut sedikit melengkung */
+}
+
+.logo span {
+  display: block;
+  margin-top: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #ffffff;
+  text-align: center;
+}
+
+/* Menu */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.menu a {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  padding: 8px 0;
+  border-radius: 6px;
+  transition: background-color 0.3s;
+}
+
+.menu a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Logout */
+.logout {
+  margin-top: auto;
+  margin-bottom: 50px; /* posisi logout di bagian bawah sidebar */
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* Area konten */
+.content {
+  flex: 1;
+  padding: 30px;
+  background-color: #f8f9ff; /* sedikit abu lembut agar beda dengan sidebar */
+}
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  margin-bottom: 20px;
+}
+
+ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+ul li a:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+ul li a.active {
+  background-color: rgba(255, 255, 255, 0.25);
+  font-weight: 600;
+}
+/* Sidebar.css */
+
+/* 1. Pengaturan Sidebar Utama */
+.sidebar {
+  width: 250px; /* Tentukan lebar sidebar */
+  height: 100vh; /* Tinggi penuh layar */
+  background-color: #0d254c; /* Warna biru tua (sesuai gambar) */
+  color: #ffffff; /* Warna teks default (putih) */
+  display: flex;
+  flex-direction: column; /* Mengatur item secara vertikal */
+  justify-content: space-between; /* Mendorong logo&menu ke atas, logout ke bawah */
+  padding: 20px 0; /* Beri jarak atas dan bawah */
+  font-family: Arial, sans-serif; /* Ganti font agar lebih rapi */
+}
+
+/* 2. Pengaturan Logo */
+.logo {
+  display: flex;
+  flex-direction: column; /* Logo di atas, teks di bawah */
+  align-items: center; /* Posisi di tengah (horizontal) */
+  padding: 0 20px; /* Jarak dari sisi kiri/kanan */
+  margin-bottom: 30px; /* Jarak ke menu di bawahnya */
+}
+
+.logo img {
+  width: 80px; /* Sesuaikan ukuran logo agar pas */
+  height: auto;
+  margin-bottom: 10px; /* Jarak antara gambar logo dan teks span */
+}
+
+.logo span {
+  font-size: 1.2rem; /* Ukuran font "TRI TUNGGAL" */
+  font-weight: bold; /* Buat tebal agar jelas */
+}
+
+/* 3. Pengaturan Menu Navigasi (ITEM, VENDOR, AHS) */
+.sidebar ul {
+  list-style-type: none; /* Hilangkan bulatan/bullet list */
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin: 10px 20px; /* Jarak antar item menu (atas/bawah 10px, kiri/kanan 20px) */
+}
+
+/* Ini adalah style untuk link (ITEM, VENDOR, AHS) */
+.sidebar li a {
+  display: block; /* Buat link memenuhi area 'li' */
+  padding: 12px 15px; /* Jarak di dalam tombol link */
+  color: #e0e0e0; /* Warna teks (putih pudar) */
+  text-decoration: none; /* Hilangkan garis bawah link */
+  border-radius: 8px; /* Buat sudutnya melengkung */
+  text-align: center; /* Teks di tengah */
+  font-weight: 500;
+  transition: background-color 0.3s, color 0.3s; /* Animasi halus saat di-hover */
+}
+
+/* 4. Style saat link di-hover (mouse di atasnya) */
+.sidebar li a:hover {
+  background-color: #1a3a6e; /* Warna latar sedikit berubah */
+  color: #ffffff; /* Teks jadi putih cerah */
+}
+
+/* 5. Style untuk link yang AKTIF (sesuai gambar Anda) */
+.sidebar li a.active {
+  background-color: #3b82f6; /* Warna biru cerah (sesuai gambar) */
+  color: #ffffff; /* Teks putih cerah */
+  font-weight: bold; /* Teks tebal */
+}
+
+/* 6. Pengaturan Tombol Logout */
+.logout {
+  padding: 12px 15px;
+  margin: 10px 20px; /* Samakan jaraknya dengan item menu */
+  text-align: center;
+  font-weight: 500;
+  color: #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer; /* Ubah mouse jadi tangan saat menunjuk logout */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.logout:hover {
+  background-color: #c93a3a; /* Beri warna merah saat hover logout */
+  color: #ffffff;
+}
+/* --- PERBAIKAN FINAL LOGOUT & MENU --- */
+
+/* 1. Menyamakan ukuran font menu & logout */
+.sidebar li a,
+.logout {
+  /* Atur ukuran font yang sama untuk semua agar seragam */
+  font-size: 1rem; /* 1rem biasanya sekitar 16px, lebih besar dari 14px */
+}
+
+/* 2. Memperbaiki style & posisi Logout */
+.logout {
+  /* HAPUS margin 'auto' yang mendorongnya ke bawah */
+  margin-top: 10px; /* Beri jarak normal dari menu AHS */
+  margin-bottom: 10px; /* Jarak dari bawah */
+
+  /* SALIN style dari '.sidebar li a' agar sama persis */
+  display: block;
+  padding: 12px 15px;
+  color: #e0e0e0;
+  text-decoration: none;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  transition: background-color 0.3s, color 0.3s;
+  
+  /* Pastikan posisinya mengikuti margin 'li' */
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+/* 3. Pastikan override dari 'justify-content' tetap ada */
+.sidebar {
+  justify-content: flex-start;
+}
+/* 2. Memperbaiki style & posisi Logout */
+.logout {
+  /* HAPUS margin 'auto' yang mendorongnya ke bawah */
+  margin-top: 5px; /* <--- UBAH JADI 5px (atau angka lain yang lebih kecil) */
+  margin-bottom: 10px; 
+
+  /* ... style lainnya ... */
+}
+.logout {
+  cursor: pointer;
+  color: #fff;
+  text-align: center;
+  padding: 10px 0;
+  margin-top: 70px; /* naik lebih tinggi dari menu */
+}
