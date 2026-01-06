@@ -54,7 +54,7 @@ const AhsDetail = ({ selectedAhs }) => {
             <p className="detail-info">
                 ID: <strong>{ahsDisplayId}</strong> •
                 Satuan: <strong>{selectedAhs.satuan}</strong> •
-                Vendor: <strong>{selectedAhs.vendor.vendor_name || selectedAhs.vendor.nama || '-'}</strong>
+                Vendor: <strong>{selectedAhs.vendor?.vendor_name || selectedAhs.vendor?.nama || '-'}</strong>
             </p>
             <div className="ahs-produk-detail">
                 <div className="detail-item">
@@ -79,27 +79,35 @@ const AhsDetail = ({ selectedAhs }) => {
                 <div className="detail-item">
                     <div className="label">Spesifikasi (Dokumen & Teks)</div>
 
-                    <div className="value value-stack">
-                        <div className="value-file">
-                            {selectedAhs?.ahs_id ? (
-                                <a
-                                    href={`http://127.0.0.1:8000/api/dokumen/preview/${selectedAhs.ahs_id}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    📄 Dokumen
-                                </a>
-                            ) : (
-                                <span className="file-empty">Tidak ada dokumen</span>
-                            )}
-                        </div>
+                    {/* 1. POSISI ATAS: DAFTAR DOKUMEN */}
+                    <div className="value-file">
+                        {Array.isArray(selectedAhs.dokumen) && selectedAhs.dokumen.length > 0 ? (
+                            selectedAhs.dokumen.map((doc, index) => {
+                                const url = typeof doc === "string" ? doc : doc.url;
+                                const name = typeof doc === "string"
+                                    ? `Dokumen ${index + 1}`
+                                    : doc.nama || `Dokumen ${index + 1}`;
 
-                        <div className="value-textarea">
-                            {selectedAhs.spesifikasi || "-"}
-                        </div>
+                                return (
+                                    <div key={index} className="dokumen-item">
+                                        <a
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            📄 {name}
+                                        </a>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <span className="file-empty">Tidak ada dokumen</span>
+                        )}
+                    </div>
+                    <div className="value" style={{ whiteSpace: 'pre-wrap'}}>
+                        {selectedAhs.spesifikasi || '-'}
                     </div>
                 </div>
-
                 <div className="detail-item">
                     <div className="label">gambar Produk</div>
                     <div className="value value-stack">
@@ -264,37 +272,37 @@ const AhsListTable = ({ data, selectedId, onSelect, onEdit, onDelete, isAdmin })
                                             Rp {calculateTotal(ahs).toLocaleString('id-ID')}
                                         </td>
                                         <td className="ahs-actions sticky-action">
-                      <button
-                        className="btn-icon btn-view"
-                        onClick={(e) => handleRowClick(e, ahs.ahs_id)}
-                      >
-                        {ahs.ahs_id === selectedId ? "❌" : "👁️"}
-                      </button>
+                                            <button
+                                                className="btn-icon btn-view"
+                                                onClick={(e) => handleRowClick(e, ahs.ahs_id)}
+                                            >
+                                                {ahs.ahs_id === selectedId ? "❌" : "👁️"}
+                                            </button>
 
-                      {isAdmin && (
-                        <>
-                          <button
-                            className="btn-icon btn-edit"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onEdit(ahs.ahs_id);
-                            }}
-                          >
-                            ✏️
-                          </button>
+                                            {isAdmin && (
+                                                <>
+                                                    <button
+                                                        className="btn-icon btn-edit"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onEdit(ahs.ahs_id);
+                                                        }}
+                                                    >
+                                                        ✏️
+                                                    </button>
 
-                          <button
-                            className="btn-icon btn-delete"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDelete(ahs.ahs_id);
-                            }}
-                          >
-                            🗑️
-                          </button>
-                        </>
-                      )}
-                    </td>
+                                                    <button
+                                                        className="btn-icon btn-delete"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onDelete(ahs.ahs_id);
+                                                        }}
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </>
+                                            )}
+                                        </td>
                                     </tr>
                                     {ahs.ahs_id === selectedId && (
                                         <tr className="ahs-detail-row">
@@ -360,11 +368,11 @@ const Ahs = () => {
         setLoading(true);
         setError(null);
         try {
-      const response = await axios.get(API_URL, {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-});
+            const response = await axios.get(API_URL, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             const data = response.data.data || response.data;
             const validatedData = Array.isArray(data) ? data.filter(item => item && item.ahs_id != null) : [];
             setAhsList(validatedData);
@@ -408,31 +416,31 @@ const Ahs = () => {
     const handleNavigateAdd = () => navigate('/ahs/add');
     const handleNavigateEdit = (ahsId) => navigate(`/ahs/edit/${ahsId}`);
 
-     const handleDelete = async (ahsId) => {
-    if (
-      window.confirm(
-        `Yakin hapus data AHS ID: ${ahsId}? Tindakan ini tidak bisa dibatalkan.`
-      )
-    ) {
-      try {
-        await axios.delete(`${API_URL}/${ahsId}`, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
-        setAhsList((prevList) =>
-          prevList.filter((ahs) => ahs.ahs_id !== ahsId)
-        );
-        if (selectedId === ahsId) setSelectedId(null);
-        alert(`Data AHS ID: ${ahsId} berhasil dihapus.`);
-      } catch (error) {
-        console.error("Gagal menghapus data AHS:", error);
-        alert(
-          `Gagal menghapus data AHS ID: ${ahsId}. Cek koneksi API. Detail: ${error.message}`
-        );
-      }
-    }
-  };
+    const handleDelete = async (ahsId) => {
+        if (
+            window.confirm(
+                `Yakin hapus data AHS ID: ${ahsId}? Tindakan ini tidak bisa dibatalkan.`
+            )
+        ) {
+            try {
+                await axios.delete(`${API_URL}/${ahsId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setAhsList((prevList) =>
+                    prevList.filter((ahs) => ahs.ahs_id !== ahsId)
+                );
+                if (selectedId === ahsId) setSelectedId(null);
+                alert(`Data AHS ID: ${ahsId} berhasil dihapus.`);
+            } catch (error) {
+                console.error("Gagal menghapus data AHS:", error);
+                alert(
+                    `Gagal menghapus data AHS ID: ${ahsId}. Cek koneksi API. Detail: ${error.message}`
+                );
+            }
+        }
+    };
 
 
     // ==================================================================
@@ -472,51 +480,51 @@ const Ahs = () => {
      * 1. Handler untuk EKSPOR Data (Langsung Unduh)
      */
     const handleExport = async () => {
-    const params = new URLSearchParams({
-      search: search || "",
-      provinsi: filterProvinsi || "",
-      kab: filterKab || "",
-      tahun: filterTahun || "",
-    }).toString();
+        const params = new URLSearchParams({
+            search: search || "",
+            provinsi: filterProvinsi || "",
+            kab: filterKab || "",
+            tahun: filterTahun || "",
+        }).toString();
 
-    try {
-      const response = await axios.get(`${API_URL}/export?${params}`, {
-        headers: {
-    Authorization: `Bearer ${token}`,
-  },
-        responseType: "blob", // PENTING
-      });
+        try {
+            const response = await axios.get(`${API_URL}/export?${params}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                responseType: "blob", // PENTING
+            });
 
-      handleDownloadResponse(response, "data_ahs_export.xlsx");
-      // Hilangkan alert sukses agar terasa lebih 'langsung'
-      // alert(`Data berhasil diekspor!`);
-    } catch (error) {
-      console.error("Error saat Ekspor Data:", error);
-      alert(`Gagal Ekspor Data. Cek koneksi dan API endpoint /ahs/export.`);
-    }
-  };
+            handleDownloadResponse(response, "data_ahs_export.xlsx");
+            // Hilangkan alert sukses agar terasa lebih 'langsung'
+            // alert(`Data berhasil diekspor!`);
+        } catch (error) {
+            console.error("Error saat Ekspor Data:", error);
+            alert(`Gagal Ekspor Data. Cek koneksi dan API endpoint /ahs/export.`);
+        }
+    };
     /**
      * 2. Handler untuk UNDUH TEMPLATE (Langsung Unduh)
      */
-   const handleDownloadTemplate = async () => {
-    setShowDropdown(false);
+    const handleDownloadTemplate = async () => {
+        setShowDropdown(false);
 
-    try {
-      const response = await axios.get(API_TEMPLATE_URL, {
-        headers: {
-    Authorization: `Bearer ${token}`,
-  },
-        responseType: "blob", // PENTING
-      });
+        try {
+            const response = await axios.get(API_TEMPLATE_URL, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                responseType: "blob", // PENTING
+            });
 
-      handleDownloadResponse(response, "template_import_ahs.xlsx");
-      // Hilangkan alert sukses agar terasa lebih 'langsung'
-      // alert(`Template berhasil diunduh!`);
-    } catch (error) {
-      console.error("Error saat Unduh Template:", error);
-      alert("Gagal Unduh Template. Pastikan API Template berjalan.");
-    }
-  };
+            handleDownloadResponse(response, "template_import_ahs.xlsx");
+            // Hilangkan alert sukses agar terasa lebih 'langsung'
+            // alert(`Template berhasil diunduh!`);
+        } catch (error) {
+            console.error("Error saat Unduh Template:", error);
+            alert("Gagal Unduh Template. Pastikan API Template berjalan.");
+        }
+    };
 
 
     /**
@@ -533,27 +541,27 @@ const Ahs = () => {
      * 3. Handler untuk Impor File (Tetap ada loading/alert karena melibatkan perubahan data)
      */
     const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) {
-      e.target.value = null;
-      return;
-    }
+        const file = e.target.files[0];
+        if (!file) {
+            e.target.value = null;
+            return;
+        }
 
-    // Feedback sederhana untuk proses impor
-    const loadingMessage = alert(
-      `Memulai Impor file ${file.name}... Mohon tunggu.`
-    );
+        // Feedback sederhana untuk proses impor
+        const loadingMessage = alert(
+            `Memulai Impor file ${file.name}... Mohon tunggu.`
+        );
 
-    const formData = new FormData();
-    formData.append("file", file);
+        const formData = new FormData();
+        formData.append("file", file);
 
-    try {
-     const response = await axios.post(API_IMPORT_URL, formData, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "multipart/form-data",
-  },
-});
+        try {
+            const response = await axios.post(API_IMPORT_URL, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                },
+            });
             console.log("Respons Impor:", response.data);
             // Feedback sukses
             alert(`Impor file ${file.name} berhasil! Pesan: ${response.data.message || 'Data berhasil diimpor.'}`);
@@ -716,41 +724,41 @@ const Ahs = () => {
                     </div>
 
                     <div className="topbar-right">
-            {/* Tombol EKSPOR (Langsung Unduh) */}
-            <button className="btn-action btn-export" onClick={handleExport}>
-              📤 Export
-            </button>
+                        {/* Tombol EKSPOR (Langsung Unduh) */}
+                        <button className="btn-action btn-export" onClick={handleExport}>
+                            📤 Export
+                        </button>
 
-            {/* Import → ADMIN SAJA */}
-            {isAdmin && (
-              <div className="dropdown" style={{ position: "relative" }}>
-                <button
-                  className="btn-action btn-import"
-                  onClick={() => setShowDropdown(!showDropdown)}
-                >
-                  📥 Import ▼
-                </button>
+                        {/* Import → ADMIN SAJA */}
+                        {isAdmin && (
+                            <div className="dropdown" style={{ position: "relative" }}>
+                                <button
+                                    className="btn-action btn-import"
+                                    onClick={() => setShowDropdown(!showDropdown)}
+                                >
+                                    📥 Import ▼
+                                </button>
 
-                {showDropdown && (
-                  <div className="dropdown-menu">
-                    <button onClick={handleDownloadTemplate}>
-                      📄 Unduh Template
-                    </button>
-                    <button onClick={handleSelectFile}>📂 Pilih File</button>
-                  </div>
-                )}
-              </div>
-            )}
+                                {showDropdown && (
+                                    <div className="dropdown-menu">
+                                        <button onClick={handleDownloadTemplate}>
+                                            📄 Unduh Template
+                                        </button>
+                                        <button onClick={handleSelectFile}>📂 Pilih File</button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-            {/* Tambah Data → ADMIN SAJA */}
-            {isAdmin && (
-              <button
-                className="btn-action btn-new"
-                onClick={handleNavigateAdd}
-              >
-                + Baru
-              </button>
-            )}
+                        {/* Tambah Data → ADMIN SAJA */}
+                        {isAdmin && (
+                            <button
+                                className="btn-action btn-new"
+                                onClick={handleNavigateAdd}
+                            >
+                                + Baru
+                            </button>
+                        )}
 
                         {/* Input File Tersembunyi untuk Import */}
                         <input

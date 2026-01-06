@@ -22,28 +22,29 @@ const UniversalSelector = ({ selectedObject, onSelect }) => {
                 setIsLoading(true);
                 setError(null);
 
-                // const [itemsResponse, ahsResponse] = await Promise.all([
-                //     fetch(ITEMS_API_URL),
-                //     fetch(AHS_API_URL)
-                // ]);
-
-                const [itemsResponse] = await Promise.all([
+                const [itemsResponse, ahsResponse] = await Promise.all([
                     fetch(ITEMS_API_URL, {
-                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            Accept: "application/json",
+                        },
+                    }),
+                    fetch(AHS_API_URL, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                             Accept: "application/json",
                         },
                     }),
                 ]);
+
                 if (!itemsResponse.ok) throw new Error("Gagal mengambil Item");
-                // if (!ahsResponse.ok) throw new Error("Gagal mengambil AHS");
+                if (!ahsResponse.ok) throw new Error("Gagal mengambil AHS");
 
                 const itemsData = await itemsResponse.json();
-                // const ahsData = await ahsResponse.json();
+                const ahsData = await ahsResponse.json();
 
                 setItemList(itemsData?.data ?? []);
-                // setAhsList(ahsData?.data ?? []);
+                setAhsList(ahsData?.data ?? []);
             } catch (err) {
                 console.error("Error:", err);
                 setError(err.message || "Gagal memuat data");
@@ -54,6 +55,7 @@ const UniversalSelector = ({ selectedObject, onSelect }) => {
 
         fetchData();
     }, []);
+
 
     // ===== GABUNGKAN DATA =====
     const unifiedData = useMemo(() => {
@@ -71,18 +73,18 @@ const UniversalSelector = ({ selectedObject, onSelect }) => {
             displayPrice: Number(item.hpp) || 0,
         }));
 
-        // const formattedAhs = ahsList.map((ahs) => ({
-        //     ...ahs,
-        //     uniqueId: `AHS-${ahs.id}`, // FIX DUPLICATE KEY
-        //     type: "AHS",
-        //     displayId: ahs.ahs_no || `AHS-${ahs.id}`,
-        //     displayName: ahs.deskripsi || "-",
-        //     displayUnit: ahs.satuan || "-",
-        //     displayPrice: Number(ahs.harga_pokok_total) || 0
-        // }));
+        const formattedAhs = ahsList.map((ahs) => ({
+            ...ahs,
+            uniqueId: `AHS-${ahs.id}`, // FIX DUPLICATE KEY
+            type: "AHS",
+            displayId: ahs.ahs_no || `AHS-${ahs.id}`,
+            displayName: ahs.deskripsi || "-",
+            displayUnit: ahs.satuan || "-",
+            displayPrice: Number(ahs.harga_pokok_total) || 0
+        }));
 
-        // const merged = [...formattedItems, ...formattedAhs];
-        const merged = [...formattedItems];
+        const merged = [...formattedItems, ...formattedAhs];
+        //const merged = [...formattedItems];
 
         return merged.filter((obj) => {
             const idMatch = obj.displayId.toLowerCase().includes(term);

@@ -527,3 +527,22 @@ h2 {
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.chart-filter {
+  display: flex;
+  gap: 8px;
+}
+
+.chart-filter select {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+

@@ -546,7 +546,7 @@ const response = await axios.get(url, {
                 <label>Contact</label>
                 <input
                   placeholder="Nama PIC"
-                  value={formData.contact}
+                  value={formData.contact_name}
                   onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
                 />
                 <label>Telepon</label>

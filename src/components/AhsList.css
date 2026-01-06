@@ -771,3 +771,16 @@
   background: #1d103f;
 }
 
+.dokumen-item {
+    margin-bottom: 6px;
+}
+
+.dokumen-item a {
+    color: #2e1a5e;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.dokumen-item a:hover {
+    text-decoration: underline;
+}

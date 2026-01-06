@@ -103,7 +103,7 @@ const Item = () => {
 
   // === 2. FETCH DATA ITEMS ===
 
- const fetchItems = useCallback(async () => {
+  const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -113,18 +113,22 @@ const Item = () => {
       if (filterTahun) params.append("tahun", filterTahun);
 
       const response = await axios.get(
-  `${API_BASE_URL}/items?${params.toString()}`,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
+        `${API_BASE_URL}/items?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response.data && Array.isArray(response.data.data)) {
-        setItems(response.data.data);
+        setItems(
+          response.data.data.filter((i) => !i.ahs_id && !i.is_ahs)
+        );
       } else if (Array.isArray(response.data)) {
-        setItems(response.data);
+        setItems(
+          response.data.filter((i) => !i.ahs_id && !i.is_ahs)
+        );
       } else {
         setItems([]);
       }
@@ -397,13 +401,13 @@ const Item = () => {
 
     try {
       const response = await axios.get(
-    `${API_BASE_URL}/items/next-id`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+        `${API_BASE_URL}/items/next-id`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setFormData((prev) => ({ ...prev, item_no: response.data.next_id }));
     } catch (error) {
       console.error("Gagal mengambil ID otomatis:", error);
@@ -530,33 +534,33 @@ const Item = () => {
       data.append("produk_dokumen[]", file, file.name)
     );
 
-   try {
+    try {
       if (isEditMode) {
-  data.append("_method", "PUT");
-  await axios.post(
-    `${API_BASE_URL}/items/${formData.id}`,
-    data,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  alert("Data berhasil diperbarui!");
-} else {
-  await axios.post(
-    `${API_BASE_URL}/items`,
-    data,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  alert("Data berhasil ditambahkan!");
-}
+        data.append("_method", "PUT");
+        await axios.post(
+          `${API_BASE_URL}/items/${formData.id}`,
+          data,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        alert("Data berhasil diperbarui!");
+      } else {
+        await axios.post(
+          `${API_BASE_URL}/items`,
+          data,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        alert("Data berhasil ditambahkan!");
+      }
       fetchItems();
       setShowModal(false);
     } catch (error) {
@@ -572,77 +576,77 @@ const Item = () => {
   };
 
   const handleDelete = async (id) => {
-  if (window.confirm("Yakin hapus data?")) {
+    if (window.confirm("Yakin hapus data?")) {
+      try {
+        const token = localStorage.getItem("token");
+
+        await axios.delete(`${API_BASE_URL}/items/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        fetchItems();
+      } catch (error) {
+        console.error(error.response?.data || error);
+        alert("Gagal menghapus.");
+      }
+    }
+  };
+
+  const handleExport = async () => {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.delete(`${API_BASE_URL}/items/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_BASE_URL}/items/export`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob", // ⬅️ PENTING
+        }
+      );
 
-      fetchItems();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "items.xlsx"); // sesuaikan nama file
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } catch (error) {
-      console.error(error.response?.data || error);
-      alert("Gagal menghapus.");
+      alert("Gagal export data");
+      console.error(error);
     }
-  }
-};
-
-  const handleExport = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    const response = await axios.get(
-      `${API_BASE_URL}/items/export`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        responseType: "blob", // ⬅️ PENTING
-      }
-    );
-
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "items.xlsx"); // sesuaikan nama file
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } catch (error) {
-    alert("Gagal export data");
-    console.error(error);
-  }
-};
+  };
 
   const handleDownloadTemplate = async () => {
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
 
-    const response = await axios.get(
-      `${API_BASE_URL}/items/template/download`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        responseType: "blob",
-      }
-    );
+      const response = await axios.get(
+        `${API_BASE_URL}/items/template/download`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+        }
+      );
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "template_items.xlsx");
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } catch (error) {
-    alert("Gagal download template");
-    console.error(error);
-  }
-};
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "template_items.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      alert("Gagal download template");
+      console.error(error);
+    }
+  };
 
 
   const handleImport = async (e) => {
@@ -653,15 +657,15 @@ const Item = () => {
     setLoading(true);
     try {
       await axios.post(
-  `${API_BASE_URL}/items/import`,
-  fd,
-  {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
+        `${API_BASE_URL}/items/import`,
+        fd,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       alert("Import berhasil!");
       fetchItems();
     } catch (e) {
@@ -887,7 +891,7 @@ const Item = () => {
                 <button className="btn-action btn-new" onClick={handleOpenAdd}>
                   + Baru
                 </button>
-                </>
+              </>
             )}
             <input
               type="file"
@@ -952,7 +956,7 @@ const Item = () => {
                                   background: "none",
                                   border: "none",
                                   color: "#1a73e8",
-                                  cursor: "pointer",  
+                                  cursor: "pointer",
                                   fontSize: "12px",
                                   padding: 0,
                                 }}
@@ -1022,7 +1026,7 @@ const Item = () => {
                               >
                                 🗑️
                               </button>
-                              </>
+                            </>
                           )}
                         </div>
                       </td>

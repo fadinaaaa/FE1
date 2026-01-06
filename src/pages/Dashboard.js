@@ -34,47 +34,74 @@ const Dashboard = () => {
   // State untuk data grafik lingkaran (Pie Chart)
   const [pieData, setPieData] = useState([]);
 
+  // ================= FILTER TAHUN & BULAN =================
+  const currentYear = new Date().getFullYear();
+
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState("all"); // all | 0-11
+
+
   const COLORS = ["#4e73df", "#1cc88a", "#f6c23e"];
 
-  // Fungsi untuk mengelompokkan data berdasarkan bulan (created_at)
-  const processMonthlyData = (vendors, items, ahsList) => {
+  const processMonthlyData = (vendors, items, ahsList, year, month) => {
     const months = [
       "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
       "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
     ];
 
-    // Inisialisasi struktur data 12 bulan dengan nilai 0
-    const monthlyStats = months.map((month) => ({
-      name: month,
-      vendor: 0,
-      item: 0,
-      ahs: 0, // Diubah menjadi 0
-    }));
+    // ================= SEMUA BULAN =================
+    if (month === "all") {
+      const monthlyStats = months.map((m) => ({
+        name: m,
+        vendor: 0,
+        item: 0,
+        ahs: 0,
+      }));
 
-    // Helper function untuk increment bulan
-    const incrementMonth = (dataList, key) => {
-      // PERBAIKAN 1: Cek apakah dataList benar-benar Array sebelum di-loop
-      if (!Array.isArray(dataList)) {
-        return;
-      }
+      const incrementMonth = (dataList, key) => {
+        if (!Array.isArray(dataList)) return;
 
-      dataList.forEach((data) => {
-        // Asumsi data dari backend memiliki field 'created_at'
-        if (data.created_at) {
-          const date = new Date(data.created_at);
-          const monthIndex = date.getMonth(); // 0 = Jan, 11 = Des
-          if (monthlyStats[monthIndex]) {
-            monthlyStats[monthIndex][key] += 1;
+        dataList.forEach((data) => {
+          if (data.created_at) {
+            const date = new Date(data.created_at);
+            if (date.getFullYear() === year) {
+              const monthIndex = date.getMonth();
+              monthlyStats[monthIndex][key] += 1;
+            }
           }
-        }
-      });
-    };
+        });
+      };
 
-    incrementMonth(vendors, "vendor");
-    incrementMonth(items, "item");
-    incrementMonth(ahsList, "ahs"); // Tambahkan AHS
+      incrementMonth(vendors, "vendor");
+      incrementMonth(items, "item");
+      incrementMonth(ahsList, "ahs");
 
-    return monthlyStats;
+      return monthlyStats;
+    }
+
+    // ================= BULAN TERTENTU =================
+    const monthIndex = parseInt(month);
+
+    const countByMonth = (dataList) =>
+      Array.isArray(dataList)
+        ? dataList.filter((d) => {
+          if (!d.created_at) return false;
+          const date = new Date(d.created_at);
+          return (
+            date.getFullYear() === year &&
+            date.getMonth() === monthIndex
+          );
+        }).length
+        : 0;
+
+    return [
+      {
+        name: months[monthIndex],
+        vendor: countByMonth(vendors),
+        item: countByMonth(items),
+        ahs: countByMonth(ahsList),
+      },
+    ];
   };
 
   useEffect(() => {
@@ -120,8 +147,15 @@ const Dashboard = () => {
         ]);
 
         // 3. Update Bar Chart Data (Aktivitas Bulanan)
-        const processedBarData = processMonthlyData(vendors, items, ahsList);
+        const processedBarData = processMonthlyData(
+          vendors,
+          items,
+          ahsList,
+          selectedYear,
+          selectedMonth
+        );
         setBarData(processedBarData);
+
 
       } catch (error) {
         console.error("Gagal mengambil data dashboard:", error);
@@ -129,7 +163,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [selectedYear, selectedMonth]);
 
   return (
     <div className="layout">
@@ -193,7 +227,42 @@ const Dashboard = () => {
 
             {/* BAR CHART */}
             <div className="dashboard-card chart-card">
-              <h4>Aktivitas Bulanan (Input Data)</h4>
+              <div className="chart-header">
+                <h4>Aktivitas Bulanan (Input Data)</h4>
+
+                <div className="chart-filter">
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  >
+                    {[currentYear, currentYear - 1, currentYear - 2].map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                  >
+                    <option value="all">Semua Bulan</option>
+                    <option value="0">Januari</option>
+                    <option value="1">Februari</option>
+                    <option value="2">Maret</option>
+                    <option value="3">April</option>
+                    <option value="4">Mei</option>
+                    <option value="5">Juni</option>
+                    <option value="6">Juli</option>
+                    <option value="7">Agustus</option>
+                    <option value="8">September</option>
+                    <option value="9">Oktober</option>
+                    <option value="10">November</option>
+                    <option value="11">Desember</option>
+                  </select>
+                </div>
+              </div>
+
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={barData}>
                   <XAxis dataKey="name" />
