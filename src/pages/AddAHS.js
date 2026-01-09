@@ -7,11 +7,17 @@ import "../styles/AddAHS.css";
 
 // URL API Anda
 const API_URL = "http://127.0.0.1:8000/api/ahs";
-// URL API Vendor
 const VENDOR_API_URL = "http://127.0.0.1:8000/api/vendors";
+const PROVINSI_API_URL = "http://127.0.0.1:8000/api/provinsi";
+const KABUPATEN_API_URL = "http://127.0.0.1:8000/api/kabupaten";
 
 const role = localStorage.getItem("role");
 const token = localStorage.getItem("token");
+
+const MAX_FILE_SIZE_MB = 5;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+
 
 // Fungsi pembantu untuk mengkonversi objek JavaScript ke FormData
 const buildFormData = (formData, data, parentKey) => {
@@ -59,12 +65,6 @@ const AddAHS = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // State Vendor dan Autocomplete
-  const [allVendors, setAllVendors] = useState([]);
-  const [isVendorsLoading, setIsVendorsLoading] = useState(false);
-  const [filteredVendors, setFilteredVendors] = useState([]);
-  const [isVendorSuggestionOpen, setIsVendorSuggestionOpen] = useState(false);
-  const [selectedVendorId, setSelectedVendorId] = useState(null);
 
   const [formData, setFormData] = useState({
     ahs: "",
@@ -76,11 +76,15 @@ const AddAHS = ({
     merek: "",
     vendor: "",
     vendor_id: null,
-    foto: [], // Array untuk menyimpan multiple file
+    foto: [],
     produk_deskripsi: "",
-    produk_dokumen: [], // Array untuk menyimpan multiple file
+    produk_dokumen: [],
     spesifikasi: "",
   });
+
+  useEffect(() => {
+    console.log("DEBUG allAhsData:", allAhsData);
+  }, [allAhsData]);
 
   const [items, setItems] = useState([]);
   const [editingItemId, setEditingItemId] = useState(null);
@@ -88,20 +92,116 @@ const AddAHS = ({
   const [selectedItemToAdd, setSelectedItemToAdd] = useState(null);
   const [currentItemVolume, setCurrentItemVolume] = useState(1);
 
-  // State untuk nama file yang sudah ada (mode edit)
   const [existingFotoNames, setExistingFotoNames] = useState([]);
   const [existingProdukDokumenNames, setexistingProdukDokumenNames] =
     useState([]);
 
   const vendorInputRef = useRef(null);
 
-  // === SATUAN AUTOCOMPLETE ===
+  // === AUTOCOMPLETE ===
+  //deskripsi
+  const [deskripsiList, setDeskripsiList] = useState([]);
+  const [filteredDeskripsi, setFilteredDeskripsi] = useState([]);
+  const [isDeskripsiOpen, setIsDeskripsiOpen] = useState(false);
+  const deskripsiRef = useRef(null);
+  //satuan
   const [satuanList, setSatuanList] = useState([]);
   const [filteredSatuan, setFilteredSatuan] = useState([]);
   const [isSatuanOpen, setIsSatuanOpen] = useState(false);
   const satuanInputRef = useRef(null);
+  //tahun
+  const [tahunList, setTahunList] = useState([]);
+  const [filteredTahun, setFilteredTahun] = useState([]);
+  const [isTahunOpen, setIsTahunOpen] = useState(false);
+  //prov
+  const [provinsiList, setProvinsiList] = useState([]);
+  const [filteredProvinsi, setFilteredProvinsi] = useState([]);
+  const [isProvinsiOpen, setIsProvinsiOpen] = useState(false);
+  //kab
+  const [kabupatenList, setKabupatenList] = useState([]);
+  const [filteredKabupaten, setFilteredKabupaten] = useState([]);
+  const [isKabupatenOpen, setIsKabupatenOpen] = useState(false);
+  //vendor
+  const [allVendors, setAllVendors] = useState([]);
+  const [isVendorsLoading, setIsVendorsLoading] = useState(false);
+  const [filteredVendors, setFilteredVendors] = useState([]);
+  const [isVendorSuggestionOpen, setIsVendorSuggestionOpen] = useState(false);
+  const [selectedVendorId, setSelectedVendorId] = useState(null);
+  //merek
+  const [merekList, setMerekList] = useState([]);
+  const [filteredMerek, setFilteredMerek] = useState([]);
+  const [isMerekOpen, setIsMerekOpen] = useState(false);
 
-  // --- 1. Fetch Data Vendor dan Setup Listener ---
+
+  useEffect(() => {
+    if (!Array.isArray(allAhsData)) return;
+
+    const set = new Set();
+    allAhsData.forEach(a => {
+      if (typeof a.provinsi === "string") {
+        set.add(a.provinsi.trim());
+      }
+    });
+
+    setProvinsiList(Array.from(set));
+  }, [allAhsData]);
+
+  useEffect(() => {
+    if (!Array.isArray(allAhsData) || !formData.provinsi) return;
+
+    const set = new Set();
+
+    allAhsData.forEach(a => {
+      if (a.provinsi === formData.provinsi && typeof a.kab === "string") {
+        set.add(a.kab.trim());
+      }
+    });
+
+    setKabupatenList(Array.from(set));
+  }, [allAhsData, formData.provinsi]);
+
+  useEffect(() => {
+    if (!Array.isArray(allAhsData)) return;
+
+    const set = new Set();
+
+    allAhsData.forEach(a => {
+      if (a.deskripsi) {
+        set.add(a.deskripsi.trim());
+      }
+    });
+
+    setDeskripsiList(Array.from(set));
+  }, [allAhsData]);
+
+  useEffect(() => {
+    if (!Array.isArray(allAhsData)) return;
+
+    const set = new Set();
+
+    allAhsData.forEach(a => {
+      if (a.tahun) {
+        set.add(String(a.tahun));
+      }
+    });
+
+    setTahunList(Array.from(set).sort((a, b) => a - b));
+  }, [allAhsData]);
+
+  useEffect(() => {
+    if (!Array.isArray(allAhsData)) return;
+
+    const set = new Set();
+
+    allAhsData.forEach(a => {
+      if (typeof a.merek === "string") {
+        set.add(a.merek.trim());
+      }
+    });
+
+    setMerekList(Array.from(set));
+  }, [allAhsData]);
+
   useEffect(() => {
     const fetchVendors = async () => {
       setIsVendorsLoading(true);
@@ -145,24 +245,25 @@ const AddAHS = ({
   }, []);
 
   useEffect(() => {
-    const satuanSet = new Set();
+    if (!Array.isArray(allAhsData)) return;
 
-    // dari AHS
-    if (allAhsData && allAhsData.length > 0) {
-      allAhsData.forEach((a) => {
-        if (a.satuan) satuanSet.add(a.satuan);
-      });
-    }
+    const set = new Set();
 
-    // dari item penyusun
-    if (allItemList && allItemList.length > 0) {
-      allItemList.forEach((i) => {
-        if (i.satuan) satuanSet.add(i.satuan);
-      });
-    }
+    allAhsData.forEach(a => {
+      if (typeof a.satuan === "string" && a.satuan.trim()) {
+        set.add(a.satuan.trim());
+      }
 
-    setSatuanList([...satuanSet]);
-  }, [allAhsData, allItemList]);
+      if (a.satuan && typeof a.satuan.nama === "string") {
+        set.add(a.satuan.nama.trim());
+      }
+    });
+
+    const result = Array.from(set);
+    console.log("SATUAN LIST:", result);
+
+    setSatuanList(result);
+  }, [allAhsData]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -274,7 +375,11 @@ const AddAHS = ({
       const lowerCaseValue = value.toLowerCase();
       const filtered = allVendors.filter((vendor) => {
         const name = vendor.vendor_name || vendor.nama || "";
-        return name.toLowerCase().includes(lowerCaseValue);
+        const prov = vendor.provinsi || "";
+        return (
+          name.toLowerCase().includes(lowerCaseValue) ||
+          prov.toLowerCase().includes(lowerCaseValue)
+        );
       });
       setFilteredVendors(filtered);
       setIsVendorSuggestionOpen(filtered.length > 0);
@@ -292,35 +397,37 @@ const AddAHS = ({
     setIsVendorSuggestionOpen(false);
   };
 
-  // Hapus File dari state (sebelum disimpan)
+  // 🔥 HANDLE HAPUS FILE (AMAN UNTUK FILE BARU & FILE LAMA)
   const handleRemoveFile = (fileName, fieldName) => {
-
+    // hapus dari tampilan
     setFormData((prev) => {
-      // Pastikan field tersebut array, kalau null/undefined jadikan array kosong
       const currentFiles = Array.isArray(prev[fieldName]) ? prev[fieldName] : [];
-
-      const newFiles = currentFiles.filter((file) => {
-        // KASUS 1: File adalah String (Path/URL dari database)
-        if (typeof file === "string") {
-          // Ambil nama file saja dari path (misal: "uploads/foto.jpg" jadi "foto.jpg")
-          const existingName = file.split(/[/\\]/).pop(); 
-          return existingName !== fileName;
-        }
-        
-        // KASUS 2: File adalah Object (Upload baru dari komputer user)
-        if (file && file.name) {
-          return file.name !== fileName;
-        }
-
-        return true; // Pertahankan jika format tidak dikenali
-      });
 
       return {
         ...prev,
-        [fieldName]: newFiles,
+        [fieldName]: currentFiles.filter((file) => {
+          if (file instanceof File) return file.name !== fileName;
+          if (typeof file === "string")
+            return file.split(/[/\\]/).pop() !== fileName;
+          return true;
+        }),
       };
     });
+
+    // 🔥 sinkron ke existing file list
+    if (fieldName === "foto") {
+      setExistingFotoNames((prev) =>
+        prev.filter((name) => name !== fileName)
+      );
+    }
+
+    if (fieldName === "produk_dokumen") {
+      setexistingProdukDokumenNames((prev) =>
+        prev.filter((name) => name !== fileName)
+      );
+    }
   };
+
 
   // Perubahan Input (TERMASUK FILE UPLOAD BERTAHAP)
   const handleChange = (e) => {
@@ -332,7 +439,6 @@ const AddAHS = ({
         ...prev,
         [name]: [...prev.foto, ...newFiles], // Menggabungkan file lama dan baru
       }));
-      setExistingFotoNames([]);
       e.target.value = ""; // Reset input file
     } else if (name === "produk_dokumen") {
       const newFiles = Array.from(files);
@@ -397,9 +503,8 @@ const AddAHS = ({
   };
 
   const handleEditItem = (item) => {
-    // Pastikan item_id terambil dengan benar agar tidak hilang saat save
     setSelectedItemToAdd({
-      item_id: item.itemId, // ID Database PENTING
+      item_id: item.itemId,
       displayId: item.displayId,
       displayName: item.uraian,
       displayUnit: item.satuan,
@@ -409,31 +514,129 @@ const AddAHS = ({
       satuan: item.satuan
     });
     setCurrentItemVolume(item.volume);
-    setEditingItemId(item.displayId); // Kunci ID item yang sedang diedit
+    setEditingItemId(item.displayId);
   };
 
-  // === SATUAN AUTOCOMPLETE HANDLER ===
-  const handleSatuanChange = (e) => {
+  //deskripsi pekerjaan autocomplete
+  const handleDeskripsiChange = (e) => {
     const value = e.target.value;
-
-    setFormData((prev) => ({ ...prev, satuan: value }));
+    setFormData(prev => ({ ...prev, deskripsi: value }));
 
     if (!value) {
+      setIsDeskripsiOpen(false);
+      return;
+    }
+
+    const filtered = deskripsiList.filter(d =>
+      d.toLowerCase().includes(value.toLowerCase())
+    );
+
+    setFilteredDeskripsi(filtered);
+    setIsDeskripsiOpen(filtered.length > 0);
+  };
+
+  const handleSelectDeskripsi = (value) => {
+    setFormData(prev => ({ ...prev, deskripsi: value }));
+    setIsDeskripsiOpen(false);
+  };
+  // tahun autocomplete
+  const handleTahunChange = (e) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, tahun: value }));
+
+    if (value.length === 0) {
+      setFilteredTahun([]);
+      setIsTahunOpen(false);
+      return;
+    }
+
+    const filtered = tahunList.filter(t =>
+      t.includes(value)
+    );
+
+    setFilteredTahun(filtered);
+    setIsTahunOpen(true);
+  };
+  //prov autocomplete
+  const handleProvinsiChange = (e) => {
+    const value = e.target.value;
+
+    setFormData(prev => ({
+      ...prev,
+      provinsi: value,
+      kab: "",
+    }));
+
+    if (value.length === 0) {
+      setFilteredProvinsi([]);
+      setIsProvinsiOpen(false);
+      return;
+    }
+
+    const filtered = provinsiList.filter(p =>
+      p.toLowerCase().includes(value.toLowerCase())
+    );
+
+    setFilteredProvinsi(filtered);
+    setIsProvinsiOpen(true);
+  };
+  //kab
+  const handleKabupatenChange = (e) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, kab: value }));
+
+    if (value.length === 0) {
+      setFilteredKabupaten([]);
+      setIsKabupatenOpen(false);
+      return;
+    }
+
+    const filtered = kabupatenList.filter(k =>
+      k.toLowerCase().includes(value.toLowerCase())
+    );
+
+    setFilteredKabupaten(filtered);
+    setIsKabupatenOpen(true);
+  };
+  //merek
+  const handleMerekChange = (e) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, merek: value }));
+
+    if (value.length === 0) {
+      setFilteredMerek([]);
+      setIsMerekOpen(false);
+      return;
+    }
+
+    const filtered = merekList.filter(m =>
+      m.toLowerCase().includes(value.toLowerCase())
+    );
+
+    setFilteredMerek(filtered);
+    setIsMerekOpen(true);
+  };
+  //satuan autocomplete
+  const handleSatuanChange = (e) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, satuan: value }));
+
+    if (value.length === 0) {
       setFilteredSatuan([]);
       setIsSatuanOpen(false);
       return;
     }
 
-    const filtered = satuanList.filter((s) =>
+    const filtered = satuanList.filter(s =>
       s.toLowerCase().includes(value.toLowerCase())
     );
-
+    console.log("FILTERED:", filtered);
     setFilteredSatuan(filtered);
     setIsSatuanOpen(filtered.length > 0);
   };
 
   const handleSelectSatuan = (value) => {
-    setFormData((prev) => ({ ...prev, satuan: value }));
+    setFormData(prev => ({ ...prev, satuan: value }));
     setIsSatuanOpen(false);
   };
 
@@ -467,6 +670,8 @@ const AddAHS = ({
       kab: formData.kab,
       produk_foto: formData.foto,
       produk_dokumen: formData.produk_dokumen,
+      existing_foto: existingFotoNames,
+      existing_produk_dokumen: existingProdukDokumenNames,
       items: itemsPayload,
       _method: isEditMode ? "PUT" : "POST",
     };
@@ -689,90 +894,148 @@ const AddAHS = ({
       <form className="ahs-form">
         {/* ID & Deskripsi Utama */}
 
-        <div style={inputWrapperStyle}>
+        <div style={inputWrapperStyle} ref={deskripsiRef}>
           <label style={labelStyle}>Deskripsi Pekerjaan *</label>
-          <input
-            type="text"
-            name="deskripsi"
-            value={formData.deskripsi}
-            onChange={handleChange}
-            required
-            style={{ ...inputWrapperStyle }}
-          />
+          <div className="satuan-wrapper">
+            <input
+              placeholder="Pekerjaan"
+              type="text"
+              value={formData.deskripsi}
+              onChange={handleDeskripsiChange}
+              autoComplete="off"
+            />
+            {isDeskripsiOpen && (
+              <div className="satuan-dropdown">
+                {filteredDeskripsi.map((d, i) => (
+                  <div
+                    key={i}
+                    className="satuan-item"
+                    onClick={() => handleSelectDeskripsi(d)}
+                  >
+                    {d}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Satuan, Tahun, Provinsi, Kab */}
         <div style={gridStyle}>
           <div style={inputWrapperStyle} ref={satuanInputRef}>
             <label style={labelStyle}>Satuan</label>
-
-            <input
-              type="text"
-              value={formData.satuan}
-              onChange={handleSatuanChange}
-              onFocus={() => filteredSatuan.length > 0 && setIsSatuanOpen(true)}
-              placeholder="Contoh: m2, m3, bh, ls"
-              style={{
-                width: "100%",
-                padding: "10px",
-                height: "42px",
-                boxSizing: "border-box",
-              }}
-            />
-
-            {isSatuanOpen && filteredSatuan.length > 0 && (
-              <ul style={suggestionListStyle}>
-                {filteredSatuan.map((s, idx) => (
-                  <li
-                    key={idx}
-                    onClick={() => handleSelectSatuan(s)}
-                    style={suggestionItemStyle}
-                    onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor =
-                      suggestionItemHoverStyle.backgroundColor)
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = "transparent")
-                    }
-                  >
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="satuan-wrapper">
+              <input
+                type="text"
+                value={formData.satuan}
+                onChange={handleSatuanChange}
+                placeholder="Satuan"
+              />
+              {isSatuanOpen && filteredSatuan.length > 0 && (
+                <div className="satuan-dropdown">
+                  {filteredSatuan.map((s, i) => (
+                    <div
+                      key={i}
+                      className="satuan-item"
+                      onClick={() => handleSelectSatuan(s)}
+                    >
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div style={inputWrapperStyle}>
             <label style={labelStyle}>Tahun</label>
-            <input
-              type="text"
-              name="tahun"
-              value={formData.tahun}
-              onChange={handleChange}
-              style={{ ...inputWrapperStyle }}
-            />
+            <div className="satuan-wrapper">
+              <input
+                type="text"
+                value={formData.tahun}
+                onChange={handleTahunChange}
+                onFocus={() => {
+                  setFilteredTahun(tahunList);
+                  setIsTahunOpen(tahunList.length > 0);
+                }}
+                autoComplete="off"
+              />
+              {isTahunOpen && (
+                <div className="satuan-dropdown">
+                  {filteredTahun.map((t, i) => (
+                    <div
+                      key={i}
+                      className="satuan-item"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, tahun: t }));
+                        setIsTahunOpen(false);
+                      }}
+                    >
+                      {t}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-        <div style={gridStyle}>
+
           <div style={inputWrapperStyle}>
             <label style={labelStyle}>Provinsi</label>
-            <input
-              type="text"
-              name="provinsi"
-              value={formData.provinsi}
-              onChange={handleChange}
-              style={{ ...inputWrapperStyle }}
-            />
+            <div className="satuan-wrapper">
+              <input
+                type="text"
+                value={formData.provinsi}
+                onChange={handleProvinsiChange}
+                autoComplete="off"
+                placeholder="Provinsi"
+              />
+
+              {isProvinsiOpen && (
+                <div className="satuan-dropdown">
+                  {filteredProvinsi.map((p, i) => (
+                    <div
+                      key={i}
+                      className="satuan-item"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, provinsi: p, kab: "" }));
+                        setIsProvinsiOpen(false);
+                      }}
+                    >
+                      {p}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
           <div style={inputWrapperStyle}>
             <label style={labelStyle}>Kabupaten</label>
-            <input
-              type="text"
-              name="kab"
-              value={formData.kab}
-              onChange={handleChange}
-              style={{ ...inputWrapperStyle }}
-            />
+            <div className="satuan-wrapper">
+              <input
+                type="text"
+                value={formData.kab}
+                onChange={handleKabupatenChange}
+                disabled={!formData.provinsi}
+                placeholder={!formData.provinsi ? "Isi provinsi terlebih duhulu" : "Kabupaten"}
+                autoComplete="off"
+              />
+              {isKabupatenOpen && (
+                <div className="satuan-dropdown">
+                  {filteredKabupaten.map((k, i) => (
+                    <div
+                      key={i}
+                      className="satuan-item"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, kab: k }));
+                        setIsKabupatenOpen(false);
+                      }}
+                    >
+                      {k}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -780,13 +1043,32 @@ const AddAHS = ({
         <div style={gridStyle}>
           <div style={inputWrapperStyle}>
             <label style={labelStyle}>Merek</label>
-            <input
-              type="text"
-              name="merek"
-              value={formData.merek}
-              onChange={handleChange}
-              style={{ ...inputWrapperStyle }}
-            />
+            <div className="satuan-wrapper">
+              <input
+                placeholder="Merek Produk"
+                type="text"
+                value={formData.merek}
+                onChange={handleMerekChange}
+                autoComplete="off"
+              />
+
+              {isMerekOpen && (
+                <div className="satuan-dropdown">
+                  {filteredMerek.map((m, i) => (
+                    <div
+                      key={i}
+                      className="satuan-item"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, merek: m }));
+                        setIsMerekOpen(false);
+                      }}
+                    >
+                      {m}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div style={inputWrapperStyle}>
             <label style={labelStyle}>Vendor</label>
@@ -816,7 +1098,12 @@ const AddAHS = ({
                     <li
                       key={vendor.id}
                       onClick={() => handleVendorSelect(vendor)}
-                      style={suggestionItemStyle}
+                      style={{
+                        ...suggestionItemStyle,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
                       onMouseEnter={(e) =>
                       (e.currentTarget.style.backgroundColor =
                         suggestionItemHoverStyle.backgroundColor)
@@ -825,10 +1112,21 @@ const AddAHS = ({
                         (e.currentTarget.style.backgroundColor = "transparent")
                       }
                     >
-                      {vendor.vendor_name ||
-                        vendor.nama ||
-                        `Vendor ID: ${vendor.id}`}
+                      <span>
+                        {vendor.vendor_name || vendor.nama}
+                      </span>
+
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          color: "#666",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        ({(vendor.provinsi || vendor.nama_provinsi || "").toLowerCase()})
+                      </span>
                     </li>
+
                   ))}
                 </ul>
               )}
@@ -859,6 +1157,15 @@ const AddAHS = ({
         {/* --- Upload FOTO Produk (Desain Box Chip) --- */}
         <div style={inputWrapperStyle}>
           <label style={labelStyle}>Foto Produk</label>
+          <p
+            style={{
+              fontSize: "12px",
+              color: "#666",
+              margin: "0 0 5px 0",
+            }}
+          >
+            Maksimal ukuran per file: {MAX_FILE_SIZE_MB}MB
+          </p>
           <div style={fileBoxStyle}>
             <label htmlFor="foto-upload" style={browseButtonStyle}>
               + Tambah Foto
@@ -874,12 +1181,12 @@ const AddAHS = ({
             />
 
             {/* {existingFotoNames.length > 0 && (
-              <div
-                style={{ fontSize: "12px", marginTop: "10px", color: "#555" }}
-              >
-                File Lama: {existingFotoNames.join(", ")}
-              </div>
-            )} */}
+                <div
+                  style={{ fontSize: "12px", marginTop: "10px", color: "#555" }}
+                >
+                  File Lama: {existingFotoNames.join(", ")}
+                </div>
+              )} */}
 
             {formData.foto.map((file, index) => {
               let fileName = "";
@@ -924,7 +1231,16 @@ const AddAHS = ({
         {/* --- 2. Spesifikasi (Dokumen Multiple dan Teks) --- */}
         <div style={inputWrapperStyle}>
           <label style={labelStyle}>Spesifikasi (Dokumen & Teks)</label>
-
+          <p
+            style={{
+              fontSize: "12px",
+              color: "#666",
+              margin: "0 0 5px 0",
+            }}
+          >
+            Maksimal ukuran per file pdf : {MAX_FILE_SIZE_MB}
+            MB
+          </p>
           {/* Input Dokumen (Desain Box Chip) */}
           <div style={fileBoxStyle}>
             <label htmlFor="dokumen-upload" style={browseButtonStyle}>
@@ -941,12 +1257,12 @@ const AddAHS = ({
             />
 
             {/* {existingProdukDokumenNames.length > 0 && (
-              <div
-                style={{ fontSize: "12px", marginTop: "10px", color: "#555" }}
-              >
-                Dokumen Lama: {existingProdukDokumenNames.join(", ")}
-              </div>
-            )} */}
+                <div
+                  style={{ fontSize: "12px", marginTop: "10px", color: "#555" }}
+                >
+                  Dokumen Lama: {existingProdukDokumenNames.join(", ")}
+                </div>
+              )} */}
 
             {formData.produk_dokumen.map((file, index) => {
               let fileName = "";

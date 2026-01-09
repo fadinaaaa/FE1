@@ -451,7 +451,7 @@ h2 {
 .dashboard-card {
   background: white;
   border-radius: 12px;
-  padding: 20px;
+  padding: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
@@ -536,8 +536,10 @@ h2 {
 }
 
 .chart-filter {
-  display: flex;
-  gap: 8px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
 }
 
 .chart-filter select {

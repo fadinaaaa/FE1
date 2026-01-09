@@ -7,9 +7,9 @@ import { FaTimes } from "react-icons/fa";
 
 // Base URL API
 const API_BASE_URL = "http://127.0.0.1:8000/api";
-const role = localStorage.getItem("role"); // admin | user
-const isAdmin = role === "admin";
-const token = localStorage.getItem('token');
+//const role = localStorage.getItem("role"); // admin | user
+//const isAdmin = role === "admin";
+//const token = localStorage.getItem('token');
 
 
 // 🔥 KONSTANTA BATAS FILE (contoh: 5MB)
@@ -17,6 +17,10 @@ const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 const Item = () => {
+  const [role, setRole] = useState(localStorage.getItem("role"));
+  const [token, setToken] = useState(localStorage.getItem("token"));
+
+  const isAdmin = role === "admin";
   // === 1. STATE & DATA ===
   const filterRef = useRef(null);
 
@@ -37,10 +41,28 @@ const Item = () => {
   const [showKabDD, setShowKabDD] = useState(false);
   const [showTahunDD, setShowTahunDD] = useState(false);
 
-  // === STATE SATUAN (Autocomplete Lokal) ===
+  // === STATE (Autocomplete Lokal) ===
+  //Ahs
+  const [ahsList, setAhsList] = useState([]);
+  const [ahsSuggestions, setAhsSuggestions] = useState([]);
+  const [showAhsDropdown, setShowAhsDropdown] = useState(false);
+  //merek
+  const [merekList, setMerekList] = useState([]);
+  const [merekSuggestions, setMerekSuggestions] = useState([]);
+  const [showMerekDropdown, setShowMerekDropdown] = useState(false);
+  //satuan
   const [satuanList, setSatuanList] = useState([]);
   const [satuanSuggestions, setSatuanSuggestions] = useState([]);
   const [showSatuanDropdown, setShowSatuanDropdown] = useState(false);
+  //prov
+  const [provSuggestions, setProvSuggestions] = useState([]);
+  const [showProvDropdown, setShowProvDropdown] = useState(false);
+  //kab
+  const [kabSuggestions, setKabSuggestions] = useState([]);
+  const [showKabDropdown, setShowKabDropdown] = useState(false);
+  //tahun
+  const [tahunSuggestions, setTahunSuggestions] = useState([]);
+  const [showTahunDropdown, setShowTahunDropdown] = useState(false);
 
   // State Modal & UI
   const [showModal, setShowModal] = useState(false);
@@ -51,7 +73,7 @@ const Item = () => {
   const [showFotoModal, setShowFotoModal] = useState(false);
   const [fotoList, setFotoList] = useState([]);
 
-  // 🔥 State Error Validasi File
+  //  State Error Validasi File
   const [fotoError, setFotoError] = useState("");
   const [docError, setDocError] = useState("");
 
@@ -140,6 +162,19 @@ const Item = () => {
   }, [search, filterProvinsi, filterKab, filterTahun]);
 
   useEffect(() => {
+    const handleStorageChange = () => {
+      setRole(localStorage.getItem("role"));
+      setToken(localStorage.getItem("token"));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  useEffect(() => {
     const handler = setTimeout(() => {
       fetchItems();
     }, 500);
@@ -149,19 +184,24 @@ const Item = () => {
   // === ISI DROPDOWN FILTER DARI DATA ITEMS ===
   useEffect(() => {
     if (items.length > 0) {
-      // Provinsi unik
       const provSet = new Set(items.map((i) => i.provinsi).filter(Boolean));
       setProvinsiOptions([...provSet]);
 
-      // Kab unik
       const kabSet = new Set(items.map((i) => i.kab).filter(Boolean));
       setKabOptions([...kabSet]);
 
-      // Tahun unik (urut desc)
       const tahunSet = new Set(items.map((i) => i.tahun).filter(Boolean));
       setTahunOptions([...tahunSet].sort((a, b) => b - a));
     }
   }, [items]);
+
+  useEffect(() => {
+    if (!formData.provinsi) {
+      setFormData(prev => ({ ...prev, kab: "" }));
+      setKabSuggestions([]);
+      setShowKabDropdown(false);
+    }
+  }, [formData.provinsi]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -178,6 +218,10 @@ const Item = () => {
 
   useEffect(() => {
     if (items.length > 0) {
+      const uniqueAhs = [...new Set(items.map(i => i.ahs).filter(s => s?.trim()))];
+      setAhsList(uniqueAhs);
+      const uniqueMerek = [...new Set(items.map(i => i.merek).filter(s => s?.trim()))];
+      setMerekList(uniqueMerek);
       const uniqueSatuan = [
         ...new Set(
           items.map((item) => item.satuan).filter((s) => s && s.trim() !== "")
@@ -186,6 +230,29 @@ const Item = () => {
       setSatuanList(uniqueSatuan);
     }
   }, [items]);
+
+  const handleLocalSearch = (value, sourceList, setSuggestions, setShowDropdown, fieldName) => {
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
+
+    if (!value) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    const filtered = sourceList.filter(item =>
+      item.toLowerCase().includes(value.toLowerCase())
+    );
+
+    setSuggestions(filtered);
+    setShowDropdown(filtered.length > 0);
+  };
+
+  const handleSelectLocal = (value, setSuggestions, setShowDropdown, fieldName) => {
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    setSuggestions([]);
+    setShowDropdown(false);
+  };
 
   // === 3. LOGIC LIVE SEARCH VENDOR ===
 
@@ -249,13 +316,12 @@ const Item = () => {
   // === 4. FILE HANDLERS (Multiple File & Chip Display) ===
 
   // 🔥 MODIFIKASI: Implementasi VALIDASI TANPA POP-UP (Hanya Teks Merah)
+  // ✅ KODE PERBAIKAN (BENAR)
   const handleFileChange = (e, fieldName) => {
     const newFiles = Array.from(e.target.files);
     let validFiles = [];
     let totalOverSize = 0;
-    let isOverSize = false;
 
-    // Reset error state
     if (fieldName === "fotoFiles") setFotoError("");
     if (fieldName === "docSpecFiles") setDocError("");
 
@@ -263,41 +329,29 @@ const Item = () => {
 
     newFiles.forEach((file) => {
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        isOverSize = true;
         totalOverSize++;
-        // File yang melebihi batas TIDAK dimasukkan ke validFiles
       } else {
-        // Pastikan nama file baru tidak duplikat dengan yang sudah ada di state
         const isDuplicate = currentFiles.some((f) => f.name === file.name);
-        if (!isDuplicate) {
-          validFiles.push(file);
-        }
+        if (!isDuplicate) validFiles.push(file);
       }
     });
 
-    let errorMessage = "";
-    if (isOverSize) {
-      const fileType =
-        fieldName === "fotoFiles" ? "Foto" : "Dokumen Spesifikasi";
-      errorMessage = `⚠️ ${totalOverSize} file ${fileType} melebihi batas maksimal ${MAX_FILE_SIZE_MB}MB dan tidak ditambahkan.`;
-      // Set error state, ini akan menampilkan teks merah di bawah input
-      if (fieldName === "fotoFiles") setFotoError(errorMessage);
-      if (fieldName === "docSpecFiles") setDocError(errorMessage);
+    if (totalOverSize > 0) {
+      const type = fieldName === "fotoFiles" ? "Foto" : "Dokumen";
+      const msg = `⚠️ ${totalOverSize} file ${type} melebihi batas ${MAX_FILE_SIZE_MB}MB`;
+      if (fieldName === "fotoFiles") setFotoError(msg);
+      if (fieldName === "docSpecFiles") setDocError(msg);
     }
 
+    // ✅ PENTING: JANGAN sentuh existing file
     if (validFiles.length > 0) {
       setFormData((prev) => ({
         ...prev,
-        // Tambahkan file yang valid ke list
         [fieldName]: [...prev[fieldName], ...validFiles],
       }));
-
-      // Jika ada upload baru, kosongkan existing file names (asumsi upload baru akan menggantikan/melengkapi)
-      if (fieldName === "fotoFiles") setExistingFotoNames([]);
-      if (fieldName === "docSpecFiles") setExistingDocNames([]);
     }
 
-    e.target.value = null; // Reset input agar file yang sama bisa diupload lagi
+    e.target.value = null;
   };
 
   // Menghapus file yang baru dipilih (belum disimpan ke server)
@@ -423,7 +477,8 @@ const Item = () => {
     const vName = item.vendor ? getVendorName(item.vendor) : "";
     const vNo = item.vendor ? item.vendor.vendor_no : "";
 
-    const existingFoto = item?.gambar?.map((f) => f.file_name) || [];
+    const existingFoto =
+      item?.gambar?.map((f) => f.file_name).filter(Boolean) || [];
 
     const existingDoc = item?.dokumen?.map((d) => d.file_name) || [];
 
@@ -481,29 +536,6 @@ const Item = () => {
     data.append("tahun", formData.tahun || "");
     data.append("produk_deskripsi", formData.deskripsiProduk || "-");
     data.append("spesifikasi", formData.teksSpesifikasi || "-");
-
-    const handleSatuanChange = (e) => {
-      const value = e.target.value;
-      setFormData({ ...formData, satuan: value });
-
-      if (value.length === 0) {
-        setSatuanSuggestions([]);
-        setShowSatuanDropdown(false);
-        return;
-      }
-
-      const filtered = satuanList.filter((s) =>
-        s.toLowerCase().includes(value.toLowerCase())
-      );
-
-      setSatuanSuggestions(filtered);
-      setShowSatuanDropdown(filtered.length > 0);
-    };
-
-    const handleSelectSatuan = (value) => {
-      setFormData({ ...formData, satuan: value });
-      setShowSatuanDropdown(false);
-    };
 
     // Vendor Logic
     if (isEditMode) {
@@ -940,42 +972,29 @@ const Item = () => {
                       <td>{item.tahun}</td>
                       <td>
                         {item?.gambar && item.gambar.length > 0 ? (
-                          <>
-                            {/* Thumbnail */}
+                          <div
+                            className="gambar-wrapper"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFotoList(item.gambar);
+                              setShowFotoModal(true);
+                            }}
+                          >
                             <img
                               src={`http://127.0.0.1:8000${item.gambar[0].file_url}`}
                               alt={item.gambar[0].file_name}
-                              className="table-img"
+                              className="gambar-preview"
                             />
-
-                            {/* Button lihat semua foto */}
-                            <div>
-                              <button
-                                className="link-doc"
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  color: "#1a73e8",
-                                  cursor: "pointer",
-                                  fontSize: "12px",
-                                  padding: 0,
-                                }}
-                                onClick={() => {
-                                  setFotoList(item.gambar);
-                                  setShowFotoModal(true);
-                                }}
-                              >
-                                📷 Lihat {item.gambar.length} Foto
-                              </button>
+                            <div className="gambar-caption">
+                              📷 {item.gambar.length} Foto
                             </div>
-                          </>
+                          </div>
                         ) : (
                           <div className="value-textarea no-photo">
                             Tidak ada gambar
                           </div>
                         )}
                       </td>
-
                       <td className="col-desc-prod">{item.produk_deskripsi}</td>
                       <td className="col-specs">
                         {item?.dokumen && item.dokumen.length > 0
@@ -1054,13 +1073,23 @@ const Item = () => {
               <h3>{isEditMode ? "Edit Data Item" : "Tambah Data Item"}</h3>
               <div className="modal-body">
                 <label>AHS</label>
-                <input
-                  placeholder="Material / Jasa"
-                  value={formData.ahs}
-                  onChange={(e) =>
-                    setFormData({ ...formData, ahs: e.target.value })
-                  }
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    placeholder="Material / Jasa"
+                    value={formData.ahs}
+                    onChange={(e) => handleLocalSearch(e.target.value, ahsList, setAhsSuggestions, setShowAhsDropdown, "ahs")}
+                    onFocus={() => formData.ahs && handleLocalSearch(formData.ahs, ahsList, setAhsSuggestions, setShowAhsDropdown, "ahs")}
+                  />
+                  {showAhsDropdown && (
+                    <div className="autocomplete-dropdown">
+                      {ahsSuggestions.map((item, idx) => (
+                        <div key={idx} className="suggestion-item" onClick={() => handleSelectLocal(item, setAhsSuggestions, setShowAhsDropdown, "ahs")}>
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <label>Deskripsi</label>
                 <input
                   placeholder="Nama Item"
@@ -1070,13 +1099,23 @@ const Item = () => {
                   }
                 />
                 <label>Merek</label>
-                <input
-                  placeholder="Merek Produk"
-                  value={formData.merek}
-                  onChange={(e) =>
-                    setFormData({ ...formData, merek: e.target.value })
-                  }
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    placeholder="Merek Produk"
+                    value={formData.merek}
+                    onChange={(e) => handleLocalSearch(e.target.value, merekList, setMerekSuggestions, setShowMerekDropdown, "merek")}
+                    onFocus={() => formData.merek && handleLocalSearch(formData.merek, merekList, setMerekSuggestions, setShowMerekDropdown, "merek")}
+                  />
+                  {showMerekDropdown && (
+                    <div className="autocomplete-dropdown">
+                      {merekSuggestions.map((item, idx) => (
+                        <div key={idx} className="suggestion-item" onClick={() => handleSelectLocal(item, setMerekSuggestions, setShowMerekDropdown, "merek")}>
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <label>Satuan</label>
                 <div style={{ position: "relative" }}>
                   <input
@@ -1089,7 +1128,6 @@ const Item = () => {
                       }
                     }}
                   />
-
                   {showSatuanDropdown && (
                     <div className="autocomplete-dropdown">
                       {satuanSuggestions.map((satuan, idx) => (
@@ -1113,8 +1151,6 @@ const Item = () => {
                     setFormData({ ...formData, hpp: e.target.value })
                   }
                 />
-
-                {/* --- FITUR PENCARIAN VENDOR LIVE --- */}
                 <div style={{ position: "relative" }} ref={vendorInputRef}>
                   <label>Vendor</label>
                   <input
@@ -1132,7 +1168,6 @@ const Item = () => {
                       Vendor tidak ditemukan.
                     </p>
                   )}
-
                   {vendorSuggestions.length > 0 && (
                     <div className="autocomplete-dropdown">
                       {vendorSuggestions.map((vendor) => (
@@ -1148,34 +1183,97 @@ const Item = () => {
                     </div>
                   )}
                 </div>
-                {/* ----------------------------------- */}
-
                 <label>Provinsi</label>
-                <input
-                  placeholder="Lokasi Provinsi"
-                  value={formData.provinsi}
-                  onChange={(e) =>
-                    setFormData({ ...formData, provinsi: e.target.value })
-                  }
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    placeholder="Lokasi Provinsi"
+                    value={formData.provinsi}
+                    onChange={(e) => handleLocalSearch(e.target.value, provinsiOptions, setProvSuggestions, setShowProvDropdown, "provinsi")}
+                    onFocus={() => formData.provinsi && handleLocalSearch(formData.provinsi, provinsiOptions, setProvSuggestions, setShowProvDropdown, "provinsi")}
+                  />
+                  {showProvDropdown && (
+                    <div className="autocomplete-dropdown">
+                      {provSuggestions.map((item, idx) => (
+                        <div key={idx} className="suggestion-item" onClick={() => handleSelectLocal(item, setProvSuggestions, setShowProvDropdown, "provinsi")}>
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <label>Kab</label>
-                <input
-                  placeholder="Lokasi Kab"
-                  value={formData.kab}
-                  onChange={(e) =>
-                    setFormData({ ...formData, kab: e.target.value })
-                  }
-                />
-                <label>Tahun</label>
-                <input
-                  placeholder="Tahun Anggaran"
-                  type="number"
-                  value={formData.tahun}
-                  onChange={(e) =>
-                    setFormData({ ...formData, tahun: e.target.value })
-                  }
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    placeholder={
+                      formData.provinsi
+                        ? "Kabupaten"
+                        : "Isi Provinsi terlebih dahulu"
+                    }
+                    value={formData.kab}
+                    disabled={!formData.provinsi}
+                    onChange={(e) =>
+                      handleLocalSearch(
+                        e.target.value,
+                        kabOptions,
+                        setKabSuggestions,
+                        setShowKabDropdown,
+                        "kab"
+                      )
+                    }
+                    onFocus={() => {
+                      if (!formData.provinsi) return;
 
+                      formData.kab &&
+                        handleLocalSearch(
+                          formData.kab,
+                          kabOptions,
+                          setKabSuggestions,
+                          setShowKabDropdown,
+                          "kab"
+                        );
+                    }}
+                    style={{
+                      backgroundColor: !formData.provinsi ? "#f5f5f5" : "white",
+                      cursor: !formData.provinsi ? "not-allowed" : "text"
+                    }}
+                  />
+                  {showKabDropdown && (
+                    <div className="autocomplete-dropdown">
+                      {kabSuggestions.map((item, idx) => (
+                        <div key={idx} className="suggestion-item" onClick={() => handleSelectLocal(item, setKabSuggestions, setShowKabDropdown, "kab")}>
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <label>Tahun</label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    placeholder="Tahun"
+                    value={formData.tahun}
+                    onChange={(e) =>
+                      handleLocalSearch(e.target.value, tahunOptions.map(String), setTahunSuggestions, setShowTahunDropdown, "tahun")
+                    }
+                    onFocus={() =>
+                      formData.tahun &&
+                      handleLocalSearch(formData.tahun, tahunOptions.map(String), setTahunSuggestions, setShowTahunDropdown, "tahun")
+                    }
+                  />
+                  {showTahunDropdown && (
+                    <div className="autocomplete-dropdown">
+                      {tahunSuggestions.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="suggestion-item"
+                          onClick={() => handleSelectLocal(item, setTahunSuggestions, setShowTahunDropdown, "tahun")}
+                        >
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <label
                   style={{
                     fontWeight: "bold",
@@ -1196,7 +1294,6 @@ const Item = () => {
                   }
                 />
 
-                {/* --- FILE BOX: Upload FOTO Produk --- */}
                 <div>
                   <label
                     style={{
@@ -1318,7 +1415,7 @@ const Item = () => {
                       margin: "0 0 5px 0",
                     }}
                   >
-                    Maksimal ukuran per file word atau pdf : {MAX_FILE_SIZE_MB}
+                    Maksimal ukuran per file pdf : {MAX_FILE_SIZE_MB}
                     MB
                   </p>
                   <div style={fileBoxStyle}>

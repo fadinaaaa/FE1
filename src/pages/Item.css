@@ -372,3 +372,28 @@
 .gambar-modal-image {
     height: 180px;
 }
+
+.gambar-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.gambar-preview {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.gambar-caption {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 4px;
+}

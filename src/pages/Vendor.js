@@ -7,19 +7,15 @@ import axios from "axios";
 
 // Definisikan BASE URL untuk kemudahan
 const API_URL = "http://127.0.0.1:8000/api/vendors";
-const role = localStorage.getItem("role");
-const isAdmin = role === "admin";
-const token = localStorage.getItem('token');
 
 const Vendor = () => {
-  // === 1. DATA DUMMY (DIHAPUS & DIGANTI DENGAN STATE KOSONG) ===
-  // Mengganti data dummy dengan state untuk data yang akan diambil dari API
+  const [role, setRole] = useState(localStorage.getItem("role"));
+  const isAdmin = role === "admin";
+  const token = localStorage.getItem('token');
+
   const [vendors, setVendors] = useState([]);
-  const [loading, setLoading] = useState(false); // State untuk loading
+  const [loading, setLoading] = useState(false); 
 
-  // === 2. STATE (TIDAK BERUBAH) ===
-
-  // ... (State lainnya tetap sama)
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState({
@@ -51,6 +47,7 @@ const Vendor = () => {
   // Logika Filter sekarang akan digantikan oleh Back-end melalui API
 
   // === FUNGSI UTAMA: MENGAMBIL DATA DARI API ===
+
   const fetchVendors = async () => {
     setLoading(true);
     try {
@@ -63,11 +60,11 @@ const Vendor = () => {
 
       const url = `${API_URL}?${params.toString()}`;
 
-const response = await axios.get(url, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       // Asumsi BE mengembalikan array vendor di response.data
       setVendors(response.data);
     } catch (error) {
@@ -78,8 +75,19 @@ const response = await axios.get(url, {
     }
   };
 
-  // useEffect untuk memuat data pertama kali dan saat filter berubah
-  // Kita akan menggunakan 'vendors' sebagai data yang ditampilkan, jadi kita hilangkan 'filteredVendors'
+  useEffect(() => {
+    const handleRoleChange = () => {
+      const newRole = localStorage.getItem("role");
+      setRole(newRole);
+    };
+
+    window.addEventListener("storage", handleRoleChange);
+
+    return () => {
+      window.removeEventListener("storage", handleRoleChange);
+    };
+  }, []);
+
   useEffect(() => {
     // Panggil fetchVendors setiap kali filter berubah
     fetchVendors();
@@ -136,10 +144,10 @@ const response = await axios.get(url, {
 
         // 1. Kirim ke Server
         await axios.post(url, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         // 2. Update UI secara Manual (Supaya langsung berubah tanpa loading)
         setVendors(prevVendors =>
@@ -156,10 +164,10 @@ const response = await axios.get(url, {
 
         // 1. Kirim ke Server & Simpan Responsenya
         const response = await axios.post(API_URL, dataToSend, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         // 2. UPDATE STATE LANGSUNG (Kunci agar muncul otomatis)
         // Kita ambil data baru dari response backend (response.data)
@@ -201,14 +209,14 @@ const response = await axios.get(url, {
   // E. Logic Hapus (Mengganti manipulasi state lokal dengan API DELETE)
   const handleDelete = async (vendor_id) => {
     if (window.confirm("Hapus vendor ini? Data akan hilang permanen!")) {
-     try {
-      const url = `${API_URL}/${vendor_id}`;
+      try {
+        const url = `${API_URL}/${vendor_id}`;
 
-      await axios.delete(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+        await axios.delete(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         alert(`Vendor ID ${vendor_id} berhasil dihapus.`);
 
         // Ambil data terbaru setelah penghapusan
@@ -223,53 +231,53 @@ const response = await axios.get(url, {
 
   // F. Logic Ekspor Data
   const handleExport = async () => {
-  try {
-    const response = await axios.get(
-      "http://localhost:8000/api/vendors/export",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        responseType: "blob",
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/vendors/export",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+        }
+      );
+
+      // Buat URL dari blob
+      const url = window.URL.createObjectURL(
+        new Blob([response.data])
+      );
+
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Ambil nama file dari header (jika ada)
+      const contentDisposition = response.headers["content-disposition"];
+      let fileName = "vendors_data.xlsx";
+
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/i);
+        if (match?.[1]) {
+          fileName = match[1];
+        }
       }
-    );
 
-    // Buat URL dari blob
-    const url = window.URL.createObjectURL(
-      new Blob([response.data])
-    );
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
 
-    const link = document.createElement("a");
-    link.href = url;
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
 
-    // Ambil nama file dari header (jika ada)
-    const contentDisposition = response.headers["content-disposition"];
-    let fileName = "vendors_data.xlsx";
-
-    if (contentDisposition) {
-      const match = contentDisposition.match(/filename="(.+)"/i);
-      if (match?.[1]) {
-        fileName = match[1];
-      }
+      alert("Export data berhasil!");
+    } catch (error) {
+      console.error(
+        "Error exporting data:",
+        error.response?.data || error.message
+      );
+      alert("Gagal mengexport data vendor.");
     }
-
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-
-    // Cleanup
-    link.remove();
-    window.URL.revokeObjectURL(url);
-
-    alert("Export data berhasil!");
-  } catch (error) {
-    console.error(
-      "Error exporting data:",
-      error.response?.data || error.message
-    );
-    alert("Gagal mengexport data vendor.");
-  }
-};
+  };
 
   // G. Logic Unduh Template (Import)
   const handleDownloadTemplate = async () => {

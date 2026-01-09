@@ -75,7 +75,7 @@ const UniversalSelector = ({ selectedObject, onSelect }) => {
 
         const formattedAhs = ahsList.map((ahs) => ({
             ...ahs,
-            uniqueId: `AHS-${ahs.id}`, // FIX DUPLICATE KEY
+            uniqueId: `AHS-${ahs.id}`,
             type: "AHS",
             displayId: ahs.ahs_no || `AHS-${ahs.id}`,
             displayName: ahs.deskripsi || "-",

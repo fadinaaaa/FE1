@@ -8,7 +8,6 @@ import {
   useLocation,
 } from "react-router-dom";
 
-// ==== import halaman existing ====
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import Item from "./pages/Item";
@@ -16,14 +15,8 @@ import Vendor from "./pages/Vendor";
 import Navbar from "./components/Navbar";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/Sidebar";
-
-// ==== import halaman AHS (Updated) ====
-import Ahs from "./pages/Ahs"; // <--- Import Component Baru
+import Ahs from "./pages/Ahs";
 import AhsAdd from "./pages/AddAHS";
-
-// ==== import data ====
-import { AHS_LIST } from "./data/ahsData";
-import { ITEM_LIST } from "./data/itemData";
 
 import "./App.css";
 
@@ -37,36 +30,38 @@ function App() {
 
 function AppContent() {
   const AHS_API_URL = "http://127.0.0.1:8000/api/ahs";
+  const ITEM_API_URL = "http://127.0.0.1:8000/api/items";
   const location = useLocation();
   const isLoginPage = location.pathname === "/";
 
-  // --- State Data Utama ---
   const [ahsData, setAhsData] = useState([]);
+const fetchDataAllAHS = async () => {
+  try {
+    const [ahsRes, itemRes] = await Promise.all([
+      fetch(AHS_API_URL),
+      fetch(ITEM_API_URL),
+    ]);
 
-  
-    const fetchDataAllAHS = async () => {
-      try {
-        const [itemsResponse] = await Promise.all([
-          fetch(AHS_API_URL)
-        ]);
+    if (!ahsRes.ok || !itemRes.ok) {
+      throw new Error("Gagal mengambil data");
+    }
 
-        if (!itemsResponse.ok) throw new Error("Gagal mengambil Item");
+    const ahsJson = await ahsRes.json();
+    const itemJson = await itemRes.json();
 
-        const response = await itemsResponse.json();
-        setAhsData(response.data || []);
+    setAhsData(ahsJson.data || []);
+    setAllItemData(itemJson.data || []);
 
-      } catch (err) {
-        alert(err.message || "Gagal memuat data");
-      }
-  };
+  } catch (err) {
+    alert(err.message || "Gagal memuat data");
+  }
+};
 
   useEffect(() => {
     fetchDataAllAHS();
   }, []);
 
-  const [allItemData, setAllItemData] = useState(ITEM_LIST); // State Item list (biar konsisten pakai setAllItemData, meski di snippet awal pakai variabel lain)
-
-  // --- CRUD LOGIC ---
+  const [allItemData, setAllItemData] = useState([]);
 
   // 1. CREATE
   const handleAddAhs = (newAhsData) => {
@@ -139,25 +134,24 @@ function AppContent() {
               <AhsAdd
                 onAddSubmit={handleAddAhs}
                 allItemList={allItemData}
+                allAhsData={ahsData}
                 fetchDataAllAHS={fetchDataAllAHS}
               />
             }
           />
 
-          {/* 3. Halaman Edit AHS */}
           <Route
             path="/ahs/edit/:id"
             element={
               <AhsAdd
                 onEditSubmit={handleEditAhs}
                 allItemList={allItemData}
-                allAhsData={ahsData} // Data lengkap dikirim untuk pencarian ID di form
+                allAhsData={ahsData}
                 fetchDataAllAHS={fetchDataAllAHS}
               />
             }
           />
 
-          {/* ==== Fallback ==== */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

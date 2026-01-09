@@ -1,28 +1,16 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-// Import komponen lain
 import Sidebar from "../components/Sidebar";
 import Header from "../components/header";
-
 import "./Item.css";
 import "../components/AhsList.css";
 
-// ==================================================================
-// KONSTANTA API
-// ==================================================================
-const API_URL = "http://127.0.0.1:8000/api/ahs"; // Endpoint Utama AHS
+
+const API_URL = "http://127.0.0.1:8000/api/ahs"; 
 const API_TEMPLATE_URL = "http://127.0.0.1:8000/api/ahs/import/template";
 const API_IMPORT_URL = `${API_URL}/import`;
-const role = localStorage.getItem("role");
-const isAdmin = role === "admin";
-const token = localStorage.getItem('token');
 
-// ==================================================================
-// 1. SUB-KOMPONEN: AHS DETAIL (DETAIL PRODUK + TABEL RINCIAN)
-// ==================================================================
-// ... (AhsDetail tetap sama, perbaikan URL gambar sudah diterapkan) ...
 const AhsDetail = ({ selectedAhs }) => {
     const [showgambarModal, setShowgambarModal] = useState(false);
 
@@ -126,7 +114,7 @@ const AhsDetail = ({ selectedAhs }) => {
                                         className="gambar-preview"
                                     />
                                     <div className="gambar-caption">
-                                        📷 Lihat ({photos.length}) Foto
+                                        📷  {photos.length} Foto
                                     </div>
                                 </div>
 
@@ -139,7 +127,7 @@ const AhsDetail = ({ selectedAhs }) => {
                                         }}
                                     >
                                         <div
-                                            className="gambar-modal-content"
+                                            className="modal"
                                             onClick={(e) => e.stopPropagation()}
                                         >
                                             <div className="gambar-scroll">
@@ -147,7 +135,7 @@ const AhsDetail = ({ selectedAhs }) => {
                                                     <img
                                                         src={gambar}
                                                         alt={`gambar ${i + 1}`}
-                                                        className="gambar-modal-image"
+                                                        className="image"
                                                     />
                                                 ))}
                                             </div>
@@ -256,13 +244,13 @@ const AhsListTable = ({ data, selectedId, onSelect, onEdit, onDelete, isAdmin })
                     <tbody>
                         {data.length > 0 ? (
                             data.map((ahs, index) => (
-                                <React.Fragment key={ahs.ahs_id || `temp-${Math.random()}`}>
+                                <React.Fragment key={ahs.ahs_id}>
                                     <tr
                                         className={`ahs-row ${ahs.ahs_id === selectedId ? "active" : ""}`}
                                         onClick={(e) => handleRowClick(e, ahs.ahs_id)}
                                         style={{ cursor: 'pointer' }}
                                     >
-                                        <td>{`AHS${index + 1}`}</td>
+                                        <td>{ahs.ahs_no}</td>
                                         <td className="col-deskripsi">{ahs.deskripsi}</td>
                                         <td>{ahs.satuan}</td>
                                         <td>{ahs.provinsi || '-'}</td>
@@ -335,6 +323,9 @@ const AhsListTable = ({ data, selectedId, onSelect, onEdit, onDelete, isAdmin })
 // ==================================================================
 const Ahs = () => {
     const navigate = useNavigate();
+    const [role, setRole] = useState(localStorage.getItem("role"));
+    const [token, setToken] = useState(localStorage.getItem("token"));
+    const isAdmin = role === "admin";
 
     const [ahsList, setAhsList] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -386,6 +377,19 @@ const Ahs = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+    const handleRoleChange = () => {
+        setRole(localStorage.getItem("role"));
+        setToken(localStorage.getItem("token"));
+    };
+
+    window.addEventListener("storage", handleRoleChange);
+
+    return () => {
+        window.removeEventListener("storage", handleRoleChange);
+    };
+}, []);
 
     useEffect(() => {
         fetchDataAhs();
@@ -496,8 +500,7 @@ const Ahs = () => {
             });
 
             handleDownloadResponse(response, "data_ahs_export.xlsx");
-            // Hilangkan alert sukses agar terasa lebih 'langsung'
-            // alert(`Data berhasil diekspor!`);
+            
         } catch (error) {
             console.error("Error saat Ekspor Data:", error);
             alert(`Gagal Ekspor Data. Cek koneksi dan API endpoint /ahs/export.`);
@@ -518,8 +521,7 @@ const Ahs = () => {
             });
 
             handleDownloadResponse(response, "template_import_ahs.xlsx");
-            // Hilangkan alert sukses agar terasa lebih 'langsung'
-            // alert(`Template berhasil diunduh!`);
+        
         } catch (error) {
             console.error("Error saat Unduh Template:", error);
             alert("Gagal Unduh Template. Pastikan API Template berjalan.");

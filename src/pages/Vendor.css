@@ -14,7 +14,7 @@
 .vendor-main {
   flex: 1;
   /* Mengambil sisa lebar setelah sidebar */
-  display: flex;
+
   flex-direction: column;
   background-color: white;
   /* Warna background halaman */
